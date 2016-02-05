@@ -3,9 +3,9 @@ from datetime import datetime
 from os.path import dirname, join
 from os.path import realpath
 from threading import Thread
+from configparser import ConfigParser
 
 from cookiemonster.common.collections import UpdateCollection
-from cookiemonster.common.enums import EnrichmentSource
 from cookiemonster.common.models import Enrichment
 from cookiemonster.common.sqlalchemy import SQLAlchemyDatabaseConnector
 from cookiemonster.cookiejar import BiscuitTin
@@ -20,33 +20,52 @@ from cookiemonster.retriever.manager import PeriodicRetrievalManager
 from cookiemonster.retriever.source.irods.baton_mapper import BatonUpdateMapper
 from sqlalchemy import create_engine
 
+from hgicookiemonster.config import CONFIG_RETRIEVAL, CONFIG_RETRIEVAL_SINCE, CONFIG_RETRIEVAL_LOG_DATABASE, \
+    CONFIG_PROCESSING, CONFIG_PROCESSING_PROCESSORS, CONFIG_COOKIEJAR, CONFIG_COOKIEJAR_HOST, CONFIG_COOKIEJAR_PORT, \
+    CONFIG_COOKIEJAR_DATABASE, CONFIG_PROCESSING_RULES, CONFIG_PROCESSING_ENRICHMENT_LOADERS, \
+    CONFIG_PROCESSING_NOTIFICATION_RECEIVERS, CONFIG_BATON, CONFIG_BATON_BINARIES_LOCATION, CONFIG_BATON_ZONE, \
+    CONFIG_API, CONFIG_API_PORT
+from hgicookiemonster.config import CONFIG_RETRIEVAL_PERIOD
+
 _PROJECT_ROOT = join(dirname(realpath(__file__)))
 
 
+def get_config(location: str) -> ConfigParser:
+    config = ConfigParser()
+    config.read(location)
+
+    # os.path.isabs(my_path)
+    # config.
+    return config
+
 def main():
-    retrieval_log_database_location = "sqlite:///%s/retrieval-log.sqlite" % _PROJECT_ROOT
-    retrieval_period = 30.0
-    updates_since = datetime.fromtimestamp(0)
+    config = get_config("%s/../setup.conf" % _PROJECT_ROOT)
 
-    number_of_processors = 5
+    retrieval_log_database_location = config[CONFIG_RETRIEVAL].get(CONFIG_RETRIEVAL_LOG_DATABASE)
+    retrieval_period = config[CONFIG_RETRIEVAL].getfloat(CONFIG_RETRIEVAL_PERIOD)
+    updates_since = config[CONFIG_RETRIEVAL].getint(CONFIG_RETRIEVAL_SINCE)
 
-    manager_db_host = "http://192.168.0.11:5984"
-    manager_db_name = "cookiemonster"
+    number_of_processors = config[CONFIG_PROCESSING].getint(CONFIG_PROCESSING_PROCESSORS)
 
-    rules_directory = "%s/rules" % _PROJECT_ROOT
-    enrichment_loaders_directory = "%s/enrichment_loaders" % _PROJECT_ROOT
-    notification_receivers_directory = "%s/notification_receivers" % _PROJECT_ROOT
+    cookiejar_database_host = config[CONFIG_COOKIEJAR].getint(CONFIG_COOKIEJAR_HOST)
+    cookiejar_database_port = config[CONFIG_COOKIEJAR].getint(CONFIG_COOKIEJAR_PORT)
+    cookiejar_database_name = config[CONFIG_COOKIEJAR].getint(CONFIG_COOKIEJAR_DATABASE)
 
-    baton_install_directory = "/usr/local/bin"
+    rules_directory = config[CONFIG_PROCESSING].getint(CONFIG_PROCESSING_RULES)
+    enrichment_loaders_directory = config[CONFIG_PROCESSING].getint(CONFIG_PROCESSING_ENRICHMENT_LOADERS)
+    notification_receivers_directory = config[CONFIG_PROCESSING].getint(CONFIG_PROCESSING_NOTIFICATION_RECEIVERS)
 
-    http_api_port = 5000
+    baton_install_directory = config[CONFIG_BATON].getint(CONFIG_BATON_BINARIES_LOCATION)
+    baton_zone =  config[CONFIG_BATON].getint(CONFIG_BATON_ZONE)
+
+    http_api_port = config[CONFIG_API].getint(CONFIG_API_PORT)
 
     # Setup database for retrieval log
     engine = create_engine(retrieval_log_database_location)
     SQLAlchemyModel.metadata.create_all(bind=engine)
 
     # Setup data retrieval manager
-    update_mapper = BatonUpdateMapper(baton_install_directory, "iplant")
+    update_mapper = BatonUpdateMapper(baton_install_directory, baton_zone)
     database_connector = SQLAlchemyDatabaseConnector(retrieval_log_database_location)
     retrieval_log_mapper = SQLAlchemyRetrievalLogMapper(database_connector)
     retrieval_manager = PeriodicRetrievalManager(retrieval_period, update_mapper, retrieval_log_mapper)
@@ -56,7 +75,8 @@ def main():
     enrichment_loader_source.start()
 
     # Setup cookie jar
-    cookie_jar = BiscuitTin(manager_db_host, manager_db_name)
+
+    cookie_jar = BiscuitTin("%s:%s" % (cookiejar_database_host, cookiejar_database_port), cookiejar_database_name)
 
     # Setup rules source
     rules_source = RuleSource(rules_directory)
@@ -73,7 +93,7 @@ def main():
     # Connect the cookie jar to the retrieval manager
     def put_update_in_cookie_jar(update_collection: UpdateCollection):
         for update in update_collection:
-            enrichment = Enrichment(EnrichmentSource.IRODS_UPDATE, datetime.now(), update.metadata)
+            enrichment = Enrichment("irods_update", datetime.now(), update.metadata)
             logging.debug("Enriching \"%s\" with: %s" % (update.target, enrichment))
             Thread(target=cookie_jar.enrich_cookie, args=(update.target, enrichment)).start()
     retrieval_manager.add_listener(put_update_in_cookie_jar)
