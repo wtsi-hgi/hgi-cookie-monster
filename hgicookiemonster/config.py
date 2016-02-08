@@ -1,3 +1,6 @@
+from datetime import datetime
+from configparser import ConfigParser
+
 DEFAULT_CONFIG_LOCATION = "%s/../setup.conf"
 
 CONFIG_RETRIEVAL = "retrieval"
@@ -22,3 +25,78 @@ CONFIG_API_PORT = "port"
 CONFIG_BATON = "baton"
 CONFIG_BATON_BINARIES_LOCATION = "bin"
 CONFIG_BATON_ZONE = "zone"
+
+
+class CookieMonsterConfig:
+    """
+    Configuration for Cookie Monster.
+    """
+    class RetrievalConfig:
+        def __init__(self):
+            self.log_database = None    # type: str
+            self.period = None  # type: float
+            self.since = None   # type: datetime
+
+    class CookieJarConfig:
+        def __init__(self):
+            self.host = None    # type: str
+            self.port = None    # type: int
+            self.database = None    # type: str
+
+    class ProcessingConfig:
+        def __init__(self):
+            self.number_of_processors = None   # type: int
+            self.rules_location = None   # type: str
+            self.enrichment_loaders_location = None   # type: str
+            self.notification_receivers_location = None   # type: str
+
+    class BatonConfig:
+        def __init__(self):
+            self.binaries_location = None   # type: str
+            self.zone = None    # type: str
+
+    class ApiConfig:
+        def __init__(self):
+            self.port = None    # type: int
+
+    def __init__(self):
+        self.retrieval = CookieMonsterConfig.RetrievalConfig()
+        self.cookie_jar = CookieMonsterConfig.CookieJarConfig()
+        self.processing = CookieMonsterConfig.ProcessingConfig()
+        self.baton = CookieMonsterConfig.BatonConfig()
+        self.api = CookieMonsterConfig.ApiConfig()
+
+
+def load_config(location: str) -> CookieMonsterConfig:
+    """
+    Loads Cookie Monster configuration from the settings file at the given location.
+    :param location: the location of the settings file
+    :return: the configuration
+    """
+    config_parser = ConfigParser()
+    config_parser.read(location)
+
+    config = CookieMonsterConfig()
+
+    config.retrieval.log_database = config_parser[CONFIG_RETRIEVAL].get(CONFIG_RETRIEVAL_LOG_DATABASE)
+    config.retrieval.period = config_parser[CONFIG_RETRIEVAL].getfloat(CONFIG_RETRIEVAL_PERIOD)
+    config.retrieval.since = datetime.fromtimestamp(config_parser[CONFIG_RETRIEVAL].getint(CONFIG_RETRIEVAL_SINCE))
+
+    config.processing.number_of_processors = config_parser[CONFIG_PROCESSING].getint(CONFIG_PROCESSING_PROCESSORS)
+
+    config.processing.rules_location = config_parser[CONFIG_PROCESSING].get(CONFIG_PROCESSING_RULES)
+    config.processing.enrichment_loaders_location = config_parser[CONFIG_PROCESSING].get(
+        CONFIG_PROCESSING_ENRICHMENT_LOADERS)
+    config.processing.notification_receivers_location = config_parser[CONFIG_PROCESSING].get(
+        CONFIG_PROCESSING_NOTIFICATION_RECEIVERS)
+
+    config.cookie_jar.host = config_parser[CONFIG_COOKIEJAR].get(CONFIG_COOKIEJAR_HOST)
+    config.cookie_jar.port = config_parser[CONFIG_COOKIEJAR].getint(CONFIG_COOKIEJAR_PORT)
+    config.cookie_jar.database = config_parser[CONFIG_COOKIEJAR].get(CONFIG_COOKIEJAR_DATABASE)
+
+    config.baton.binaries_location = config_parser[CONFIG_BATON].get(CONFIG_BATON_BINARIES_LOCATION)
+    config.baton.zone = config_parser[CONFIG_BATON].get(CONFIG_BATON_ZONE)
+
+    config.api.port = config_parser[CONFIG_API].getint(CONFIG_API_PORT)
+
+    return config
