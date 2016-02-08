@@ -41,7 +41,7 @@ def run(config_location):
     enrichment_loader_source.start()
 
     # Setup cookie jar
-    cookie_jar = BiscuitTin("%s:%s" % (config.cookie_jar.host, config.cookie_jar.port), config.cookie_jar.database)
+    cookie_jar = BiscuitTin(config.cookie_jar.url, config.cookie_jar.database)
 
     # Setup rules source
     rules_source = RuleSource(config.processing.rules_location)

@@ -9,8 +9,7 @@ CONFIG_RETRIEVAL_PERIOD = "period"
 CONFIG_RETRIEVAL_SINCE = "since"
 
 CONFIG_COOKIEJAR = "cookiejar"
-CONFIG_COOKIEJAR_HOST = "host"
-CONFIG_COOKIEJAR_PORT = "port"
+CONFIG_COOKIEJAR_URL = "url"
 CONFIG_COOKIEJAR_DATABASE = "database"
 
 CONFIG_PROCESSING = "processing"
@@ -39,8 +38,7 @@ class CookieMonsterConfig:
 
     class CookieJarConfig:
         def __init__(self):
-            self.host = None    # type: str
-            self.port = None    # type: int
+            self.url = None    # type: str
             self.database = None    # type: str
 
     class ProcessingConfig:
@@ -90,8 +88,7 @@ def load_config(location: str) -> CookieMonsterConfig:
     config.processing.notification_receivers_location = config_parser[CONFIG_PROCESSING].get(
         CONFIG_PROCESSING_NOTIFICATION_RECEIVERS)
 
-    config.cookie_jar.host = config_parser[CONFIG_COOKIEJAR].get(CONFIG_COOKIEJAR_HOST)
-    config.cookie_jar.port = config_parser[CONFIG_COOKIEJAR].getint(CONFIG_COOKIEJAR_PORT)
+    config.cookie_jar.url = config_parser[CONFIG_COOKIEJAR].get(CONFIG_COOKIEJAR_URL)
     config.cookie_jar.database = config_parser[CONFIG_COOKIEJAR].get(CONFIG_COOKIEJAR_DATABASE)
 
     config.baton.binaries_location = config_parser[CONFIG_BATON].get(CONFIG_BATON_BINARIES_LOCATION)
