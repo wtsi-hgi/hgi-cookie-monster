@@ -4,21 +4,21 @@ The HGI implementation of Cookie Monster
 
 # Containerised Setup
 
-1. Build the [docker-baton](https://github.com/wtsi-hgi/docker-baton)
+1. Build the [`docker-baton`](https://github.com/wtsi-hgi/docker-baton)
    image using the HGI `feature/specificquery` fork of baton, with the
    tag `wtsi-hgi/baton:0.16.1-specificquery`.
 
-2. Build the [docker-cookie-monster](https://github.com/wtsi-hgi/docker-cookie-monster)
+2. Build the [`docker-cookie-monster`](https://github.com/wtsi-hgi/docker-cookie-monster)
    image, with the tag `wtsi-hgi/cookie-monster`.
 
 3. Build the image from this repository, using the tag
-   `wtsi-hgi/the-monster`
+   `wtsi-hgi/the-monster`.
 
-TODO: Setup iRODS here
+**TODO** iRODS setup here
 
 The container can now be run with:
 
-    docker run -dp 5000:5000 wtsi-hgi/the-monster
+    docker run -d -p 5000:5000 wtsi-hgi/the-monster
 
 # License
 
