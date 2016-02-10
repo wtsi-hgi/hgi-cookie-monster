@@ -12,7 +12,7 @@ COPY hgicookiemonster ./hgicookiemonster/
 RUN pip install -r requirements.txt
 
 # Copy setup
-COPY setup.conf /cookie-monster
+COPY setup.conf /cookie-monster/
 
 EXPOSE 5000
 ENTRYPOINT ["./the_monster.sh"]
