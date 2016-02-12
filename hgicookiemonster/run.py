@@ -31,7 +31,7 @@ def run(config_location):
     SQLAlchemyModel.metadata.create_all(bind=engine)
 
     # Setup data retrieval manager
-    update_mapper = BatonUpdateMapper(config.baton.binaries_location, config.baton.zone)
+    update_mapper = BatonUpdateMapper(config.baton.binaries_location)
     database_connector = SQLAlchemyDatabaseConnector(config.retrieval.log_database)
     retrieval_log_mapper = SQLAlchemyRetrievalLogMapper(database_connector)
     retrieval_manager = PeriodicRetrievalManager(config.retrieval.period, update_mapper, retrieval_log_mapper)
