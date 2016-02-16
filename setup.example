@@ -1,0 +1,20 @@
+[retrieval]
+log = postgresql+psycopg2://user:password@host:port/database
+period = 30.0
+since = 0
+
+[cookiejar]
+url = http://host:port
+database = cookie-monster
+
+[processing]
+processors = 5
+rules = ./hgicookiemonster/rules
+notification_receivers = ./hgicookiemonster/notification_receivers
+enrichment_loaders = ./hgicookiemonster/enrichment_loaders
+
+[api]
+port = 5000
+
+[baton]
+bin = /usr/local/bin

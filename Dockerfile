@@ -11,7 +11,5 @@ COPY requirements.txt the_monster.sh ./
 COPY hgicookiemonster ./hgicookiemonster/
 RUN pip install -r requirements.txt
 
-# HTTP API on port 5000; /cookie-monster-setup bind mount for setup
 EXPOSE 5000
-VOLUME /cookie-monster-setup
 ENTRYPOINT ["./the_monster.sh"]
