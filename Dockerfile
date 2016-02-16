@@ -1,5 +1,5 @@
 FROM wtsi-hgi/cookie-monster
-MAINTAINER "Human Genetics Informatics" <hgi@sanger.ac.uk>
+MAINTAINER "C. Monster Esq." <cmonster@sanger.ac.uk>
 
 # Install PostgreSQL development package for psycopg2
 RUN apt-get update \
@@ -11,8 +11,7 @@ COPY requirements.txt the_monster.sh ./
 COPY hgicookiemonster ./hgicookiemonster/
 RUN pip install -r requirements.txt
 
-# Copy setup
-COPY setup.conf /cookie-monster/
-
+# HTTP API on port 5000; /cookie-monster-setup bind mount for setup
 EXPOSE 5000
+VOLUME /cookie-monster-setup
 ENTRYPOINT ["./the_monster.sh"]
