@@ -1,6 +1,6 @@
 # The HGI Monster
 
-The HGI implementation of Cookie Monster
+The HGI implementation of Cookie Monster.
 
 # Containerised Setup
 
@@ -14,7 +14,7 @@ The HGI implementation of Cookie Monster
 3. Build the image from this repository, using the tag
    `wtsi-hgi/the-monster`.
 
-4. Ensure your Cookie Monster `setup.conf` is specified per `setup.example`.
+4. Ensure your Cookie Monster `setup.conf` is specified per `setup.example.conf`.
 
 5. Ensure your iRODS environment configuration file
    (`~/.irods/.irodsEnv`) has Kerberos authentication disabled by
@@ -24,12 +24,13 @@ The HGI implementation of Cookie Monster
    give you an `~/.irods/.irodsA`) file.
 
 The container can now be run with:
-
+```
     docker run -d \
                -p 50666:5000 \
                -v /path/to/your/setup:/cookie-monster-setup \
                -v /path/to/your/.irods:/root/.irods \
                wtsi-hgi/the-monster
+```
 
 # License
 
