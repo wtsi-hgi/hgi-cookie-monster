@@ -14,23 +14,39 @@ The HGI implementation of Cookie Monster.
 3. Build the image from this repository, using the tag
    `wtsi-hgi/the-monster`.
 
-4. Ensure your Cookie Monster `setup.conf` is specified per `setup.example.conf`.
+4. Ensure your Cookie Monster `setup.conf` is specified per
+   `setup.example.conf`.
 
 5. Ensure your iRODS environment configuration file
    (`~/.irods/.irodsEnv`) has Kerberos authentication disabled by
-   removing any `irodsAuthScheme 'KRB'` line.
+   removing any `irodsAuthScheme 'KRB'` line. Your `~/.irods` directory
+   will ultimately be bind mounted into the Docker container.
 
-6. Generate the iRODS password for your user using `iinit`, which should
-   give you an `~/.irods/.irodsA`) file.
+6. Start the Docker container in interactive mode, with the `~/.irods`
+   bind mount:
 
-The container can now be run with:
-```
-    docker run -d \
-               -p 50666:5000 \
-               -v /path/to/your/setup:/cookie-monster-setup \
-               -v /path/to/your/.irods:/root/.irods \
-               wtsi-hgi/the-monster
-```
+       docker run -it \
+                  -v /path/to/your/.irods:/root/.irods \
+                  --entrypoint=/bin/bash \
+                  wtsi-hgi/the-monster
+
+   ...When at the shell prompt, run `iinit` and enter your iRODS
+   password. This will create the `.irodsA` file in the bind mount,
+   which will be reciprocated on the host. Note that the ownership of
+   the host's iRODS configuration will change to `root`.
+
+7. Now you can run the container. To avoid having to rebuild the image
+   when changes need to be made to the rules, enrichment loaders or
+   notification receivers, they can also be bind mounted:
+
+       docker run -d \
+                  -p 50666:5000 \
+                  -v /path/to/your/setup:/cookie-monster-setup \
+                  -v /path/to/your/.irods:/root/.irods \
+                  -v /path/to/your/rules:/cookie-monster/hgicookiemonster/rules \
+                  -v /path/to/your/enrichment_loaders:/cookie-monster/hgicookiemonster/enrichment_loaders \
+                  -v /path/to/your/notification_receivers:/cookie-monster/hgicookiemonster/notification_receivers \
+                  wtsi-hgi/the-monster
 
 # License
 
