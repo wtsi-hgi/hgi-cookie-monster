@@ -25,10 +25,12 @@ The HGI implementation of Cookie Monster.
 6. Start the Docker container in interactive mode, with the `~/.irods`
    bind mount:
 
-       docker run -it \
-                  -v /path/to/your/.irods:/root/.irods \
-                  --entrypoint=/bin/bash \
-                  wtsi-hgi/the-monster
+   ```sh
+   docker run -it \
+              -v /path/to/your/.irods:/root/.irods \
+              --entrypoint=/bin/bash \
+              wtsi-hgi/the-monster
+   ```
 
    ...When at the shell prompt, run `iinit` and enter your iRODS
    password. This will create the `.irodsA` file in the bind mount,
@@ -39,14 +41,16 @@ The HGI implementation of Cookie Monster.
    when changes need to be made to the rules, enrichment loaders or
    notification receivers, they can also be bind mounted:
 
-       docker run -d \
-                  -p 50666:5000 \
-                  -v /path/to/your/setup:/cookie-monster-setup \
-                  -v /path/to/your/.irods:/root/.irods \
-                  -v /path/to/your/rules:/cookie-monster/hgicookiemonster/rules \
-                  -v /path/to/your/enrichment_loaders:/cookie-monster/hgicookiemonster/enrichment_loaders \
-                  -v /path/to/your/notification_receivers:/cookie-monster/hgicookiemonster/notification_receivers \
-                  wtsi-hgi/the-monster
+   ```sh
+   docker run -d \
+              -p 50666:5000 \
+              -v /path/to/your/setup:/cookie-monster-setup \
+              -v /path/to/your/.irods:/root/.irods \
+              -v /path/to/your/rules:/cookie-monster/hgicookiemonster/rules \
+              -v /path/to/your/enrichment_loaders:/cookie-monster/hgicookiemonster/enrichment_loaders \
+              -v /path/to/your/notification_receivers:/cookie-monster/hgicookiemonster/notification_receivers \
+              wtsi-hgi/the-monster
+   ```
 
 # License
 
