@@ -91,12 +91,12 @@ def _connect_retrieval_manager_to_cookie_jar(retrieval_manager: RetrievalManager
     :param retrieval_manager: the retrieval manager
     :param cookie_jar: the cookie jar to connect to
     """
-    def put_update_in_cookie_jar(update_collection: UpdateCollection):
+    def put_updates_in_cookie_jar(update_collection: UpdateCollection):
         for update in update_collection:
             enrichment = Enrichment("irods_update", datetime.now(), update.metadata)
             logging.debug("Enriching \"%s\" with: %s" % (update.target, enrichment))
             Thread(target=cookie_jar.enrich_cookie, args=(update.target, enrichment)).start()
-    retrieval_manager.add_listener(put_update_in_cookie_jar)
+    retrieval_manager.add_listener(put_updates_in_cookie_jar)
 
 
 if __name__ == "__main__":

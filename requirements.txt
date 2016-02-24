@@ -1,3 +1,3 @@
-git+https://github.com/wtsi-hgi/cookie-monster.git@2ec3a799d31bc2a88e01803df92b94b1c9d5bb33#egg=cookiemonster
+git+https://github.com/wtsi-hgi/cookie-monster.git@cd73704f82977a2a5f174a02537f2dd46ac4fab2#egg=cookiemonster
 configparser==3.5.0b2
 psycopg2==2.6.1
