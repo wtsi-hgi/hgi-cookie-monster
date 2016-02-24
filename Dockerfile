@@ -9,6 +9,7 @@ RUN apt-get update \
 WORKDIR /cookie-monster
 COPY requirements.txt the_monster.sh ./
 COPY hgicookiemonster ./hgicookiemonster/
+RUN pip uninstall -y cookie-monster
 RUN pip install -r requirements.txt
 
 EXPOSE 5000
