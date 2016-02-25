@@ -23,6 +23,7 @@ CONFIG_API_PORT = "port"
 
 CONFIG_BATON = "baton"
 CONFIG_BATON_BINARIES_LOCATION = "bin"
+CONFIG_BATON_IRODS_ZONE = "irods"
 
 
 class CookieMonsterConfig:
@@ -91,6 +92,7 @@ def load_config(location: str) -> CookieMonsterConfig:
     config.cookie_jar.database = config_parser[CONFIG_COOKIEJAR].get(CONFIG_COOKIEJAR_DATABASE)
 
     config.baton.binaries_location = config_parser[CONFIG_BATON].get(CONFIG_BATON_BINARIES_LOCATION)
+    config.baton.zone = config_parser[CONFIG_BATON].get(CONFIG_BATON_IRODS_ZONE)
 
     config.api.port = config_parser[CONFIG_API].getint(CONFIG_API_PORT)
 
