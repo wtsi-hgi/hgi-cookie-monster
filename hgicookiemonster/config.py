@@ -23,7 +23,7 @@ CONFIG_API_PORT = "port"
 
 CONFIG_BATON = "baton"
 CONFIG_BATON_BINARIES_LOCATION = "bin"
-CONFIG_BATON_IRODS_ZONE = "irods"
+CONFIG_BATON_IRODS_ZONE = "tempZone"
 
 
 class CookieMonsterConfig:
