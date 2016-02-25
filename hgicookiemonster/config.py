@@ -1,8 +1,6 @@
 from datetime import datetime
 from configparser import ConfigParser
 
-DEFAULT_CONFIG_LOCATION = "%s/../setup.conf"
-
 CONFIG_RETRIEVAL = "retrieval"
 CONFIG_RETRIEVAL_LOG_DATABASE = "log"
 CONFIG_RETRIEVAL_PERIOD = "period"
