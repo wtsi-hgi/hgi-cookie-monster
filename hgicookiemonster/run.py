@@ -7,6 +7,7 @@ from cookiemonster.common.collections import UpdateCollection
 from cookiemonster.common.models import Enrichment
 from cookiemonster.common.sqlalchemy import SQLAlchemyDatabaseConnector
 from cookiemonster.cookiejar import BiscuitTin, CookieJar
+from cookiemonster.cookiejar.rate_limited_biscuit_tin import RateLimitedBiscuitTin
 from cookiemonster.elmo import HTTP_API, APIDependency
 from cookiemonster.notifications.notification_receiver import NotificationReceiverSource
 from cookiemonster.processor._enrichment import EnrichmentLoaderSource
@@ -41,7 +42,8 @@ def run(config_location):
     enrichment_loader_source.start()
 
     # Setup cookie jar
-    cookie_jar = BiscuitTin(config.cookie_jar.url, config.cookie_jar.database)
+    cookie_jar = RateLimitedBiscuitTin(config.cookie_jar.max_requests_per_minute,
+                                       config.cookie_jar.url, config.cookie_jar.database)
 
     # Setup rules source
     rules_source = RuleSource(config.processing.rules_location)
