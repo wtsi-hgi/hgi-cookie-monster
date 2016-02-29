@@ -90,7 +90,7 @@ def load_config(location: str) -> CookieMonsterConfig:
 
     config.cookie_jar.url = config_parser[CONFIG_COOKIEJAR].get(CONFIG_COOKIEJAR_URL)
     config.cookie_jar.database = config_parser[CONFIG_COOKIEJAR].get(CONFIG_COOKIEJAR_DATABASE)
-    config.cookie_jar.max_requests_per_second = config_parser[CONFIG_COOKIEJAR].get(
+    config.cookie_jar.max_requests_per_second = config_parser[CONFIG_COOKIEJAR].getint(
         CONFIG_COOKIEJAR_MAX_REQUESTS_PER_SECOND)
 
     config.baton.binaries_location = config_parser[CONFIG_BATON].get(CONFIG_BATON_BINARIES_LOCATION)

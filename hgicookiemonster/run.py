@@ -42,7 +42,7 @@ def run(config_location):
     enrichment_loader_source.start()
 
     # Setup cookie jar
-    cookie_jar = RateLimitedBiscuitTin(config.cookie_jar.max_requests_per_minute,
+    cookie_jar = RateLimitedBiscuitTin(config.cookie_jar.max_requests_per_second,
                                        config.cookie_jar.url, config.cookie_jar.database)
 
     # Setup rules source
@@ -65,10 +65,6 @@ def run(config_location):
     api = HTTP_API()
     api.inject(APIDependency.CookieJar, cookie_jar)
     api.listen(config.api.port)
-
-    # Setup logging
-    logging.basicConfig(format="%(threadName)s:%(message)s")
-    logging.root.setLevel("DEBUG")
 
     # Start the retrieval manager
     retrieval_manager.start(config.retrieval.since)
@@ -102,7 +98,14 @@ def _connect_retrieval_manager_to_cookie_jar(retrieval_manager: RetrievalManager
 
 
 if __name__ == "__main__":
+    # Setup logging (do first thing due to issue discussed here:
+    # https://stackoverflow.com/questions/1943747/python-logging-before-you-run-logging-basicconfig
+    logging.basicConfig(format="%(threadName)s:%(message).500s", level=logging.DEBUG)
+
+    # Parse arguments
     parser = argparse.ArgumentParser(description="Eat cookies")
     parser.add_argument("configurationLocation", type=str, help="Location of the configuration file")
     args = parser.parse_args()
+
+    # Go!
     run(args.configurationLocation)
