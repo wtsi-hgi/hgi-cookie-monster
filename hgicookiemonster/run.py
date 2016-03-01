@@ -60,7 +60,7 @@ def run(config_location):
                                               rules_source, enrichment_loader_source, notification_receivers_source)
 
     # Connect components to the cookie jar
-    _connect_retrieval_manager_to_cookie_jar(retrieval_manager, cookie_jar)
+    _connect_retrieval_manager_to_cookie_jar(retrieval_manager, cookie_jar, config.cookie_jar.max_requests_per_second)
     _connect_processor_manager_to_cookie_jar(processor_manager, cookie_jar)
 
     # Setup the HTTP API
@@ -85,17 +85,20 @@ def _connect_processor_manager_to_cookie_jar(processor_manager: ProcessorManager
     cookie_jar.add_listener(prompt_processor_manager_to_process_cookie_updates)
 
 
-def _connect_retrieval_manager_to_cookie_jar(retrieval_manager: RetrievalManager, cookie_jar: CookieJar):
+def _connect_retrieval_manager_to_cookie_jar(retrieval_manager: RetrievalManager, cookie_jar: CookieJar,
+                                             number_of_threads: int=None):
     """
     Connect the given retrieval manager to the given cookie jar.
     :param retrieval_manager: the retrieval manager
     :param cookie_jar: the cookie jar to connect to
+    :param number_of_threads: the number of threads to use when putting cookies into the jar
     """
     def put_updates_in_cookie_jar(update_collection: UpdateCollection):
         for update in update_collection:
             enrichment = Enrichment("irods_update", datetime.now(), update.metadata)
             logging.debug("Enriching \"%s\" with: %s" % (update.target, enrichment))
-            Thread(target=cookie_jar.enrich_cookie, args=(update.target, enrichment)).start()
+            with ThreadPoolExecutor(max_workers=number_of_threads) as executor:
+                executor.submit(cookie_jar.enrich_cookie, update.target, enrichment)
     retrieval_manager.add_listener(put_updates_in_cookie_jar)
 
 
