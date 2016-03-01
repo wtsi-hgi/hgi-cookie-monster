@@ -1,12 +1,14 @@
 import argparse
 import logging
+import threading
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from threading import Thread
 
 from cookiemonster.common.collections import UpdateCollection
 from cookiemonster.common.models import Enrichment
 from cookiemonster.common.sqlalchemy import SQLAlchemyDatabaseConnector
-from cookiemonster.cookiejar import BiscuitTin, CookieJar
+from cookiemonster.cookiejar import CookieJar
 from cookiemonster.cookiejar.rate_limited_biscuit_tin import RateLimitedBiscuitTin
 from cookiemonster.elmo import HTTP_API, APIDependency
 from cookiemonster.notifications.notification_receiver import NotificationReceiverSource
@@ -17,7 +19,7 @@ from cookiemonster.processor.processing import ProcessorManager
 from cookiemonster.retriever.log.sqlalchemy_mapper import SQLAlchemyRetrievalLogMapper
 from cookiemonster.retriever.log.sqlalchemy_models import SQLAlchemyModel
 from cookiemonster.retriever.manager import PeriodicRetrievalManager, RetrievalManager
-from cookiemonster.retriever.source.irods.baton_mapper import BatonUpdateMapper
+from cookiemonster.retriever.source.irods.baton_mappers import BatonUpdateMapper
 from sqlalchemy import create_engine
 
 from hgicookiemonster.config import load_config
@@ -54,10 +56,10 @@ def run(config_location):
     notification_receivers_source.start()
 
     # Setup the data processor manager
-    processor_manager = BasicProcessorManager(config.processing.number_of_processors, cookie_jar, rules_source,
-                                              enrichment_loader_source, notification_receivers_source)
+    processor_manager = BasicProcessorManager(config.processing.max_cookies_to_process_simultaneously, cookie_jar,
+                                              rules_source, enrichment_loader_source, notification_receivers_source)
 
-    # Connect components tot he cookie jar
+    # Connect components to the cookie jar
     _connect_retrieval_manager_to_cookie_jar(retrieval_manager, cookie_jar)
     _connect_processor_manager_to_cookie_jar(processor_manager, cookie_jar)
 

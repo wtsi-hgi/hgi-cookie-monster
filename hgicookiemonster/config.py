@@ -12,7 +12,7 @@ CONFIG_COOKIEJAR_DATABASE = "database"
 CONFIG_COOKIEJAR_MAX_REQUESTS_PER_SECOND = "max_requests_per_second"
 
 CONFIG_PROCESSING = "processing"
-CONFIG_PROCESSING_PROCESSORS = "processors"
+CONFIG_PROCESSING_MAX_COOKIES_TO_PROCESS_SIMULTANEOUSLY = "max_cookies_to_process_simultaneously"
 CONFIG_PROCESSING_RULES = "rules"
 CONFIG_PROCESSING_NOTIFICATION_RECEIVERS = "notification_receivers"
 CONFIG_PROCESSING_ENRICHMENT_LOADERS = "enrichment_loaders"
@@ -43,7 +43,7 @@ class CookieMonsterConfig:
 
     class ProcessingConfig:
         def __init__(self):
-            self.number_of_processors = None   # type: int
+            self.max_cookies_to_process_simultaneously = None   # type: int
             self.rules_location = None   # type: str
             self.enrichment_loaders_location = None   # type: str
             self.notification_receivers_location = None   # type: str
@@ -80,7 +80,8 @@ def load_config(location: str) -> CookieMonsterConfig:
     config.retrieval.period = config_parser[CONFIG_RETRIEVAL].getfloat(CONFIG_RETRIEVAL_PERIOD)
     config.retrieval.since = datetime.fromtimestamp(config_parser[CONFIG_RETRIEVAL].getint(CONFIG_RETRIEVAL_SINCE))
 
-    config.processing.number_of_processors = config_parser[CONFIG_PROCESSING].getint(CONFIG_PROCESSING_PROCESSORS)
+    config.processing.max_cookies_to_process_simultaneously = config_parser[CONFIG_PROCESSING].getint(
+        CONFIG_PROCESSING_MAX_COOKIES_TO_PROCESS_SIMULTANEOUSLY)
 
     config.processing.rules_location = config_parser[CONFIG_PROCESSING].get(CONFIG_PROCESSING_RULES)
     config.processing.enrichment_loaders_location = config_parser[CONFIG_PROCESSING].get(
