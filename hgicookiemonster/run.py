@@ -1,9 +1,8 @@
 import argparse
 import logging
-import threading
+import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
-from threading import Thread
 
 from cookiemonster.common.collections import UpdateCollection
 from cookiemonster.common.models import Enrichment
@@ -93,17 +92,24 @@ def _connect_retrieval_manager_to_cookie_jar(retrieval_manager: RetrievalManager
     :param cookie_jar: the cookie jar to connect to
     :param number_of_threads: the number of threads to use when putting cookies into the jar
     """
+    def timed_enrichment(target: str, enrichment: Enrichment):
+        started_at = time.monotonic()
+        cookie_jar.enrich_cookie(target, enrichment)
+        logging.debug("Took %f seconds (wall time) to enrich cookie with path \"%s\""
+                      % (time.monotonic() - started_at, target))
+
     def put_updates_in_cookie_jar(update_collection: UpdateCollection):
-        for update in update_collection:
-            enrichment = Enrichment("irods_update", datetime.now(), update.metadata)
-            logging.debug("Enriching \"%s\" with: %s" % (update.target, enrichment))
-            with ThreadPoolExecutor(max_workers=number_of_threads) as executor:
-                executor.submit(cookie_jar.enrich_cookie, update.target, enrichment)
+        with ThreadPoolExecutor(max_workers=number_of_threads) as executor:
+            for update in update_collection:
+                enrichment = Enrichment("irods_update", datetime.now(), update.metadata)
+                logging.debug("Enriching \"%s\" with: %s" % (update.target, enrichment))
+                executor.submit(timed_enrichment, update.target, enrichment)
+
     retrieval_manager.add_listener(put_updates_in_cookie_jar)
 
 
 if __name__ == "__main__":
-    # Setup logging (do first thing due to issue discussed here:
+    # Setup logging - rm do first thing due to issue discussed here:
     # https://stackoverflow.com/questions/1943747/python-logging-before-you-run-logging-basicconfig
     logging.basicConfig(format="%(threadName)s:%(message).500s", level=logging.DEBUG)
 

@@ -11,7 +11,7 @@ COPY requirements.txt the_monster.sh ./
 COPY hgicookiemonster ./hgicookiemonster/
 
 # pip can go die in a fire
-RUN pip uninstall -y cookie-monster \
+RUN pip uninstall -y cookiemonster \
                      baton-python-wrapper
 RUN pip install -r requirements.txt
 RUN curl $(sed -rn "s|^git\+https://github.com/(.+).git@(.+)#egg=.+$|https://raw.githubusercontent.com/\1/\2/requirements.txt|p" requirements.txt) \
