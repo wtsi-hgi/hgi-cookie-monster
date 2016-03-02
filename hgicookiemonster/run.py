@@ -70,6 +70,9 @@ def run(config_location):
     # Start the retrieval manager
     retrieval_manager.start(config.retrieval.since)
 
+    # Start processing of any unprocessed cookies
+    processor_manager.process_any_cookies()
+
 
 def _connect_processor_manager_to_cookie_jar(processor_manager: ProcessorManager, cookie_jar: CookieJar):
     """
@@ -95,7 +98,7 @@ def _connect_retrieval_manager_to_cookie_jar(retrieval_manager: RetrievalManager
     def timed_enrichment(target: str, enrichment: Enrichment):
         started_at = time.monotonic()
         cookie_jar.enrich_cookie(target, enrichment)
-        logging.debug("Took %f seconds (wall time) to enrich cookie with path \"%s\""
+        logging.info("Took %f seconds (wall time) to enrich cookie with path \"%s\""
                       % (time.monotonic() - started_at, target))
 
     def put_updates_in_cookie_jar(update_collection: UpdateCollection):
@@ -111,7 +114,7 @@ def _connect_retrieval_manager_to_cookie_jar(retrieval_manager: RetrievalManager
 if __name__ == "__main__":
     # Setup logging - rm do first thing due to issue discussed here:
     # https://stackoverflow.com/questions/1943747/python-logging-before-you-run-logging-basicconfig
-    logging.basicConfig(format="%(threadName)s:%(message).500s", level=logging.DEBUG)
+    logging.basicConfig(format="%(asctime)s\t%(threadName)s\t%(message).500s", level=logging.DEBUG)
 
     # Parse arguments
     parser = argparse.ArgumentParser(description="Eat cookies")
