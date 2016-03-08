@@ -10,6 +10,8 @@ from cookiemonster.common.sqlalchemy import SQLAlchemyDatabaseConnector
 from cookiemonster.cookiejar import CookieJar
 from cookiemonster.cookiejar.rate_limited_biscuit_tin import RateLimitedBiscuitTin
 from cookiemonster.elmo import HTTP_API, APIDependency
+from cookiemonster.logging.influxdb.logger import InfluxDBLogger
+from cookiemonster.logging.influxdb.models import InfluxDBConnectionConfig
 from cookiemonster.notifications.notification_receiver import NotificationReceiverSource
 from cookiemonster.processor._enrichment import EnrichmentLoaderSource
 from cookiemonster.processor._rules import RuleSource
@@ -28,6 +30,11 @@ def run(config_location):
     # Load config
     config = load_config(config_location)
 
+    # Setup measurement logging
+    influxdb_config = InfluxDBConnectionConfig(config.influxdb.host, config.influxdb.port, config.influxdb.username,
+                                               config.influxdb.password, config.influxdb.database)
+    logger = InfluxDBLogger(influxdb_config)
+
     # Setup database for retrieval log
     engine = create_engine(config.retrieval.log_database)
     SQLAlchemyModel.metadata.create_all(bind=engine)
@@ -43,8 +50,8 @@ def run(config_location):
     enrichment_loader_source.start()
 
     # Setup cookie jar
-    cookie_jar = RateLimitedBiscuitTin(config.cookie_jar.max_requests_per_second,
-                                       config.cookie_jar.url, config.cookie_jar.database)
+    cookie_jar = RateLimitedBiscuitTin(config.cookie_jar.max_requests_per_second, config.cookie_jar.url,
+                                       config.cookie_jar.database)
 
     # Setup rules source
     rules_source = RuleSource(config.processing.rules_location)
@@ -55,8 +62,8 @@ def run(config_location):
     notification_receivers_source.start()
 
     # Setup the data processor manager
-    processor_manager = BasicProcessorManager(config.processing.max_cookies_to_process_simultaneously, cookie_jar,
-                                              rules_source, enrichment_loader_source, notification_receivers_source)
+    processor_manager = BasicProcessorManager(cookie_jar, rules_source, enrichment_loader_source,
+                                              notification_receivers_source, config.processing.max_threads, logger)
 
     # Connect components to the cookie jar
     _connect_retrieval_manager_to_cookie_jar(retrieval_manager, cookie_jar, config.cookie_jar.max_requests_per_second)
