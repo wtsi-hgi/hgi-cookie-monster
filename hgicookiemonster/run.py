@@ -12,6 +12,7 @@ from cookiemonster.cookiejar.rate_limited_biscuit_tin import RateLimitedBiscuitT
 from cookiemonster.elmo import HTTP_API, APIDependency
 from cookiemonster.logging.influxdb.logger import InfluxDBLogger
 from cookiemonster.logging.influxdb.models import InfluxDBConnectionConfig
+from cookiemonster.logging.logger import PythonLoggingLogger, Logger
 from cookiemonster.notifications.notification_receiver import NotificationReceiverSource
 from cookiemonster.processor._enrichment import EnrichmentLoaderSource
 from cookiemonster.processor._rules import RuleSource
@@ -24,6 +25,8 @@ from cookiemonster.retriever.source.irods.baton_mappers import BatonUpdateMapper
 from sqlalchemy import create_engine
 
 from hgicookiemonster.config import load_config
+
+_MEASUREMENT_ENRICH_TIME = "enrich_time"
 
 
 def run(config_location):
@@ -43,7 +46,7 @@ def run(config_location):
     update_mapper = BatonUpdateMapper(config.baton.binaries_location, zone=config.baton.zone)
     database_connector = SQLAlchemyDatabaseConnector(config.retrieval.log_database)
     retrieval_log_mapper = SQLAlchemyRetrievalLogMapper(database_connector)
-    retrieval_manager = PeriodicRetrievalManager(config.retrieval.period, update_mapper, retrieval_log_mapper)
+    retrieval_manager = PeriodicRetrievalManager(config.retrieval.period, update_mapper, retrieval_log_mapper, logger)
 
     # Setup enrichment manager
     enrichment_loader_source = EnrichmentLoaderSource(config.processing.enrichment_loaders_location)
@@ -66,7 +69,8 @@ def run(config_location):
                                               notification_receivers_source, config.processing.max_threads, logger)
 
     # Connect components to the cookie jar
-    _connect_retrieval_manager_to_cookie_jar(retrieval_manager, cookie_jar, config.cookie_jar.max_requests_per_second)
+    _connect_retrieval_manager_to_cookie_jar(retrieval_manager, cookie_jar, config.cookie_jar.max_requests_per_second,
+                                             logger)
     _connect_processor_manager_to_cookie_jar(processor_manager, cookie_jar)
 
     # Setup the HTTP API
@@ -95,7 +99,7 @@ def _connect_processor_manager_to_cookie_jar(processor_manager: ProcessorManager
 
 
 def _connect_retrieval_manager_to_cookie_jar(retrieval_manager: RetrievalManager, cookie_jar: CookieJar,
-                                             number_of_threads: int=None):
+                                             number_of_threads: int=None, logger: Logger=PythonLoggingLogger()):
     """
     Connect the given retrieval manager to the given cookie jar.
     :param retrieval_manager: the retrieval manager
@@ -103,16 +107,17 @@ def _connect_retrieval_manager_to_cookie_jar(retrieval_manager: RetrievalManager
     :param number_of_threads: the number of threads to use when putting cookies into the jar
     """
     def timed_enrichment(target: str, enrichment: Enrichment):
+        logging.debug("Enriching \"%s\" with: %s" % (target, enrichment))
         started_at = time.monotonic()
         cookie_jar.enrich_cookie(target, enrichment)
-        logging.info("Took %f seconds (wall time) to enrich cookie with path \"%s\""
-                      % (time.monotonic() - started_at, target))
+        time_taken = time.monotonic() - started_at
+        logger.record(_MEASUREMENT_ENRICH_TIME, time_taken)
+        logging.info("Took %f seconds (wall time) to enrich cookie with path \"%s\"" % (time_taken, target))
 
     def put_updates_in_cookie_jar(update_collection: UpdateCollection):
         with ThreadPoolExecutor(max_workers=number_of_threads) as executor:
             for update in update_collection:
                 enrichment = Enrichment("irods_update", datetime.now(), update.metadata)
-                logging.debug("Enriching \"%s\" with: %s" % (update.target, enrichment))
                 executor.submit(timed_enrichment, update.target, enrichment)
 
     retrieval_manager.add_listener(put_updates_in_cookie_jar)
@@ -122,6 +127,8 @@ if __name__ == "__main__":
     # Setup logging - rm do first thing due to issue discussed here:
     # https://stackoverflow.com/questions/1943747/python-logging-before-you-run-logging-basicconfig
     logging.basicConfig(format="%(asctime)s\t%(threadName)s\t%(message).500s", level=logging.DEBUG)
+    # Stop requests library from logging lots of "Starting new HTTP connection (1): XX.XX.XX.XX"
+    logging.getLogger("requests").setLevel(logging.WARNING)
 
     # Parse arguments
     parser = argparse.ArgumentParser(description="Eat cookies")
