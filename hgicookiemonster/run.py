@@ -8,6 +8,7 @@ from cookiemonster.common.collections import UpdateCollection
 from cookiemonster.common.models import Enrichment
 from cookiemonster.common.sqlalchemy import SQLAlchemyDatabaseConnector
 from cookiemonster.cookiejar import CookieJar
+from cookiemonster.cookiejar.logging_cookie_jar import LoggingCookieJar
 from cookiemonster.cookiejar.rate_limited_biscuit_tin import RateLimitedBiscuitTin
 from cookiemonster.elmo import HTTP_API, APIDependency
 from cookiemonster.logging.influxdb.logger import InfluxDBLogger
@@ -55,6 +56,7 @@ def run(config_location):
     # Setup cookie jar
     cookie_jar = RateLimitedBiscuitTin(config.cookie_jar.max_requests_per_second, config.cookie_jar.url,
                                        config.cookie_jar.database)
+    cookie_jar = LoggingCookieJar(cookie_jar, logger)
 
     # Setup rules source
     rules_source = RuleSource(config.processing.rules_location)
