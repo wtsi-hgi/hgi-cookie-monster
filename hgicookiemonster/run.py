@@ -3,13 +3,12 @@ import logging
 import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
+from threading import Lock
 
 from cookiemonster.common.collections import UpdateCollection
 from cookiemonster.common.models import Enrichment
-from cookiemonster.common.sqlalchemy import SQLAlchemyDatabaseConnector
-from cookiemonster.cookiejar import CookieJar
+from cookiemonster.cookiejar import CookieJar, RateLimitedBiscuitTin
 from cookiemonster.cookiejar.logging_cookie_jar import LoggingCookieJar
-from cookiemonster.cookiejar.rate_limited_biscuit_tin import RateLimitedBiscuitTin
 from cookiemonster.elmo import HTTP_API, APIDependency
 from cookiemonster.logging.influxdb.logger import InfluxDBLogger
 from cookiemonster.logging.influxdb.models import InfluxDBConnectionConfig
@@ -19,15 +18,13 @@ from cookiemonster.processor._enrichment import EnrichmentLoaderSource
 from cookiemonster.processor._rules import RuleSource
 from cookiemonster.processor.basic_processing import BasicProcessorManager
 from cookiemonster.processor.processing import ProcessorManager
-from cookiemonster.retriever.log.sqlalchemy_mapper import SQLAlchemyRetrievalLogMapper
-from cookiemonster.retriever.log.sqlalchemy_models import SQLAlchemyModel
 from cookiemonster.retriever.manager import PeriodicRetrievalManager, RetrievalManager
 from cookiemonster.retriever.source.irods.baton_mappers import BatonUpdateMapper
-from sqlalchemy import create_engine
 
 from hgicookiemonster.config import load_config
 
-_MEASUREMENT_ENRICH_TIME = "enrich_time"
+MEASUREMENT_ENRICH_TIME = "enrich_time"
+MEASUREMENT_STILL_TO_ENRICH = "still_to_enrich"
 
 
 def run(config_location):
@@ -39,15 +36,9 @@ def run(config_location):
                                                config.influxdb.password, config.influxdb.database)
     logger = InfluxDBLogger(influxdb_config)
 
-    # Setup database for retrieval log
-    engine = create_engine(config.retrieval.log_database)
-    SQLAlchemyModel.metadata.create_all(bind=engine)
-
     # Setup data retrieval manager
     update_mapper = BatonUpdateMapper(config.baton.binaries_location, zone=config.baton.zone)
-    database_connector = SQLAlchemyDatabaseConnector(config.retrieval.log_database)
-    retrieval_log_mapper = SQLAlchemyRetrievalLogMapper(database_connector)
-    retrieval_manager = PeriodicRetrievalManager(config.retrieval.period, update_mapper, retrieval_log_mapper, logger)
+    retrieval_manager = PeriodicRetrievalManager(config.retrieval.period, update_mapper, logger)
 
     # Setup enrichment manager
     enrichment_loader_source = EnrichmentLoaderSource(config.processing.enrichment_loaders_location)
@@ -86,6 +77,11 @@ def run(config_location):
     # Start processing of any unprocessed cookies
     processor_manager.process_any_cookies()
 
+    # FIXME: temp only!
+    while True:
+        logger.record("cookies_to_process", cookie_jar.queue_length())
+        time.sleep(5)
+
 
 def _connect_processor_manager_to_cookie_jar(processor_manager: ProcessorManager, cookie_jar: CookieJar):
     """
@@ -108,19 +104,30 @@ def _connect_retrieval_manager_to_cookie_jar(retrieval_manager: RetrievalManager
     :param cookie_jar: the cookie jar to connect to
     :param number_of_threads: the number of threads to use when putting cookies into the jar
     """
+    still_to_enrich = 0
+    still_to_enrich_lock = Lock()
+    thread_pool = ThreadPoolExecutor(max_workers=number_of_threads)
+
     def timed_enrichment(target: str, enrichment: Enrichment):
+        nonlocal still_to_enrich
         logging.debug("Enriching \"%s\" with: %s" % (target, enrichment))
         started_at = time.monotonic()
         cookie_jar.enrich_cookie(target, enrichment)
         time_taken = time.monotonic() - started_at
-        logger.record(_MEASUREMENT_ENRICH_TIME, time_taken)
+        logger.record(MEASUREMENT_ENRICH_TIME, time_taken)
         logging.info("Took %f seconds (wall time) to enrich cookie with path \"%s\"" % (time_taken, target))
+        with still_to_enrich_lock:
+            still_to_enrich -= 1
+            logger.record(MEASUREMENT_STILL_TO_ENRICH, still_to_enrich)
 
     def put_updates_in_cookie_jar(update_collection: UpdateCollection):
-        with ThreadPoolExecutor(max_workers=number_of_threads) as executor:
-            for update in update_collection:
-                enrichment = Enrichment("irods_update", datetime.now(), update.metadata)
-                executor.submit(timed_enrichment, update.target, enrichment)
+        nonlocal still_to_enrich
+        for update in update_collection:
+            enrichment = Enrichment("irods_update", datetime.now(), update.metadata)
+            with still_to_enrich_lock:
+                still_to_enrich += 1
+                logger.record(MEASUREMENT_STILL_TO_ENRICH, still_to_enrich)
+            thread_pool.submit(timed_enrichment, update.target, enrichment)
 
     retrieval_manager.add_listener(put_updates_in_cookie_jar)
 
