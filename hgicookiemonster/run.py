@@ -2,7 +2,7 @@ import argparse
 import logging
 import time
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime
+from datetime import datetime, timedelta
 from threading import Lock
 
 from cookiemonster.common.collections import UpdateCollection
@@ -13,6 +13,8 @@ from cookiemonster.elmo import HTTP_API, APIDependency
 from cookiemonster.logging.influxdb.logger import InfluxDBLogger
 from cookiemonster.logging.influxdb.models import InfluxDBConnectionConfig
 from cookiemonster.logging.logger import PythonLoggingLogger, Logger
+from cookiemonster.monitor.cookiejar_monitor import CookieJarMonitor
+from cookiemonster.monitor.threads_monitor import ThreadsMonitor
 from cookiemonster.notifications.notification_receiver import NotificationReceiverSource
 from cookiemonster.processor._enrichment import EnrichmentLoaderSource
 from cookiemonster.processor._rules import RuleSource
@@ -31,10 +33,13 @@ def run(config_location):
     # Load config
     config = load_config(config_location)
 
+    # TODO: Make into a setting
+    logging_buffer_latency = timedelta(seconds=10)
+
     # Setup measurement logging
     influxdb_config = InfluxDBConnectionConfig(config.influxdb.host, config.influxdb.port, config.influxdb.username,
                                                config.influxdb.password, config.influxdb.database)
-    logger = InfluxDBLogger(influxdb_config)
+    logger = InfluxDBLogger(influxdb_config, logging_buffer_latency)
 
     # Setup data retrieval manager
     update_mapper = BatonUpdateMapper(config.baton.binaries_location, zone=config.baton.zone)
@@ -77,10 +82,9 @@ def run(config_location):
     # Start processing of any unprocessed cookies
     processor_manager.process_any_cookies()
 
-    # FIXME: temp only!
-    while True:
-        logger.record("cookies_to_process", cookie_jar.queue_length())
-        time.sleep(5)
+    # Setup monitors
+    ThreadsMonitor(logger, logging_buffer_latency).start()
+    CookieJarMonitor(logger, logging_buffer_latency, cookie_jar).start()
 
 
 def _connect_processor_manager_to_cookie_jar(processor_manager: ProcessorManager, cookie_jar: CookieJar):
