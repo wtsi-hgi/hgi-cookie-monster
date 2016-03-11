@@ -39,7 +39,7 @@ def run(config_location):
     # Setup measurement logging
     influxdb_config = InfluxDBConnectionConfig(config.influxdb.host, config.influxdb.port, config.influxdb.username,
                                                config.influxdb.password, config.influxdb.database)
-    logger = InfluxDBLogger(influxdb_config, logging_buffer_latency)
+    logger = InfluxDBLogger(influxdb_config, buffer_latency=logging_buffer_latency)
 
     # Setup data retrieval manager
     update_mapper = BatonUpdateMapper(config.baton.binaries_location, zone=config.baton.zone)
@@ -94,8 +94,8 @@ def _connect_processor_manager_to_cookie_jar(processor_manager: ProcessorManager
     :param cookie_jar: the cookie jar to connect to
     """
     # Connect the data processor manager to the cookie jar
-    def prompt_processor_manager_to_process_cookie_updates(number_of_updates: int):
-        logging.debug("Prompting process manager to process %d updated cookie(s)" % number_of_updates)
+    def prompt_processor_manager_to_process_cookie_updates():
+        logging.debug("Prompting process manager to process updated cookies")
         processor_manager.process_any_cookies()
     cookie_jar.add_listener(prompt_processor_manager_to_process_cookie_updates)
 
