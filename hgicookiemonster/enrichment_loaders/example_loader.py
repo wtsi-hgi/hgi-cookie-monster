@@ -1,16 +1,18 @@
 from datetime import datetime
+
 from cookiemonster import EnrichmentLoader, Cookie, Enrichment
-from cookiemonster.common.resource_accessor import ResourceAccessor
 from hgicommon.collections import Metadata
-from hgicommon.mixable import Priority
 from hgicommon.data_source import register
+from hgicommon.mixable import Priority
+
+from hgicookiemonster.resource_accessor import HgiCookieMonsterResourceAccessor
 
 
-def _can_enrich(cookie: Cookie, resource_accessor: ResourceAccessor) -> bool:
+def _can_enrich(cookie: Cookie, resource_accessor: HgiCookieMonsterResourceAccessor) -> bool:
     return False
 
 
-def _load_enrichment(cookie: Cookie, resource_accessor: ResourceAccessor) -> Enrichment:
+def _load_enrichment(cookie: Cookie, resource_accessor: HgiCookieMonsterResourceAccessor) -> Enrichment:
     return Enrichment("my_source_name", datetime.now(), Metadata())
 
 
