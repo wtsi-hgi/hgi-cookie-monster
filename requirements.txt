@@ -1,3 +1,4 @@
 git+https://github.com/wtsi-hgi/cookie-monster.git@fa5465101e18c6c2eb68662da1ba8043e268d679#egg=cookiemonster
 configparser==3.5.0b2
 psycopg2==2.6.1
+slackclient==1.0.0

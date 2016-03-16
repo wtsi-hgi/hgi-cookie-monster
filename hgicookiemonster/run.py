@@ -25,6 +25,7 @@ from cookiemonster.retriever.source.irods.baton_mappers import BatonUpdateMapper
 
 from hgicookiemonster.config import load_config
 from hgicookiemonster.resource_accessor import HgiCookieMonsterResourceAccessor
+from hgicookiemonster.slack import Slack
 
 MEASUREMENT_ENRICH_TIME = "enrich_time"
 MEASUREMENT_STILL_TO_ENRICH = "still_to_enrich"
@@ -49,8 +50,11 @@ def run(config_location):
     update_mapper = BatonUpdateMapper(config.baton.binaries_location, zone=config.baton.zone)
     retrieval_manager = PeriodicRetrievalManager(config.retrieval.period, update_mapper, logger)
 
+    # Setup Slack client
+    slack = Slack(config.slack.token, config.slack.default_channel, config.slack.default_username)
+
     # Define what resources rules, notification receivers and enrichment loaders can access
-    resource_accessor = HgiCookieMonsterResourceAccessor(cookie_jar, config)
+    resource_accessor = HgiCookieMonsterResourceAccessor(cookie_jar, config, slack)
 
     # Setup rules source
     rules_source = RuleSource(config.processing.rules_location, resource_accessor)

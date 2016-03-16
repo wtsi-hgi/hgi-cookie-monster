@@ -31,6 +31,11 @@ CONFIG_INFLUXDB_USERNAME = "username"
 CONFIG_INFLUXDB_PASSWORD = "password"
 CONFIG_INFLUXDB_DATABASE = "database"
 
+CONFIG_SLACK = "slack"
+CONFIG_SLACK_TOKEN = "token"
+CONFIG_SLACK_DEFAULT_CHANNEL = "default_channel"
+CONFIG_SLACK_DEFAULT_USERNAME = "default_username"
+
 
 class CookieMonsterConfig:
     """
@@ -72,6 +77,12 @@ class CookieMonsterConfig:
             self.password = None    # type: str
             self.database = None    # type: str
 
+    class SlackConfig:
+        def __init__(self):
+            self.token = None   # type: str
+            self.default_channel = None     # type: str
+            self.default_username = None     # type: str
+
     def __init__(self):
         self.retrieval = CookieMonsterConfig.RetrievalConfig()
         self.cookie_jar = CookieMonsterConfig.CookieJarConfig()
@@ -79,6 +90,7 @@ class CookieMonsterConfig:
         self.baton = CookieMonsterConfig.BatonConfig()
         self.api = CookieMonsterConfig.ApiConfig()
         self.influxdb = CookieMonsterConfig.InfluxDBConfig()
+        self.slack = CookieMonsterConfig.SlackConfig()
 
 
 def load_config(location: str) -> CookieMonsterConfig:
@@ -120,5 +132,9 @@ def load_config(location: str) -> CookieMonsterConfig:
     config.influxdb.username = config_parser[CONFIG_INFLUXDB].get(CONFIG_INFLUXDB_USERNAME)
     config.influxdb.password = config_parser[CONFIG_INFLUXDB].get(CONFIG_INFLUXDB_PASSWORD)
     config.influxdb.database = config_parser[CONFIG_INFLUXDB].get(CONFIG_INFLUXDB_DATABASE)
+
+    config.slack.token = config_parser[CONFIG_SLACK].get(CONFIG_SLACK_TOKEN)
+    config.slack.default_channel = config_parser[CONFIG_SLACK].get(CONFIG_SLACK_DEFAULT_CHANNEL)
+    config.slack.default_username = config_parser[CONFIG_SLACK].get(CONFIG_SLACK_DEFAULT_USERNAME)
 
     return config
