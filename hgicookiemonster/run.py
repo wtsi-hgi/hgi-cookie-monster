@@ -24,6 +24,7 @@ from cookiemonster.retriever.manager import PeriodicRetrievalManager, RetrievalM
 from cookiemonster.retriever.source.irods.baton_mappers import BatonUpdateMapper
 
 from hgicookiemonster.config import load_config
+from hgicookiemonster.resource_accessor import HgiCookieMonsterResourceAccessor
 
 MEASUREMENT_ENRICH_TIME = "enrich_time"
 MEASUREMENT_STILL_TO_ENRICH = "still_to_enrich"
@@ -33,34 +34,36 @@ def run(config_location):
     # Load config
     config = load_config(config_location)
 
-    # TODO: Make into a setting
-    logging_buffer_latency = timedelta(seconds=10)
-
     # Setup measurement logging
+    logging_buffer_latency = timedelta(seconds=10)      # TODO: Make into a setting
     influxdb_config = InfluxDBConnectionConfig(config.influxdb.host, config.influxdb.port, config.influxdb.username,
                                                config.influxdb.password, config.influxdb.database)
     logger = InfluxDBLogger(influxdb_config, buffer_latency=logging_buffer_latency)
-
-    # Setup data retrieval manager
-    update_mapper = BatonUpdateMapper(config.baton.binaries_location, zone=config.baton.zone)
-    retrieval_manager = PeriodicRetrievalManager(config.retrieval.period, update_mapper, logger)
-
-    # Setup enrichment manager
-    enrichment_loader_source = EnrichmentLoaderSource(config.processing.enrichment_loaders_location)
-    enrichment_loader_source.start()
 
     # Setup cookie jar
     cookie_jar = RateLimitedBiscuitTin(config.cookie_jar.max_requests_per_second, config.cookie_jar.url,
                                        config.cookie_jar.database)
     add_cookie_jar_logging(cookie_jar, logger)
 
+    # Setup data retrieval manager
+    update_mapper = BatonUpdateMapper(config.baton.binaries_location, zone=config.baton.zone)
+    retrieval_manager = PeriodicRetrievalManager(config.retrieval.period, update_mapper, logger)
+
+    # Define what resources rules, notification receivers and enrichment loaders can access
+    resource_accessor = HgiCookieMonsterResourceAccessor(cookie_jar, config)
+
     # Setup rules source
-    rules_source = RuleSource(config.processing.rules_location)
+    rules_source = RuleSource(config.processing.rules_location, resource_accessor)
     rules_source.start()
 
     # Setup notification receiver source
-    notification_receivers_source = NotificationReceiverSource(config.processing.notification_receivers_location)
+    notification_receivers_source = NotificationReceiverSource(
+        config.processing.notification_receivers_location, resource_accessor)
     notification_receivers_source.start()
+
+    # Setup enrichment loader source
+    enrichment_loader_source = EnrichmentLoaderSource(config.processing.enrichment_loaders_location, resource_accessor)
+    enrichment_loader_source.start()
 
     # Setup the data processor manager
     processor_manager = BasicProcessorManager(cookie_jar, rules_source, enrichment_loader_source,
