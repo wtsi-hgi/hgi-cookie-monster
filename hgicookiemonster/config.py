@@ -2,7 +2,6 @@ from datetime import datetime
 from configparser import ConfigParser
 
 CONFIG_RETRIEVAL = "retrieval"
-CONFIG_RETRIEVAL_LOG_DATABASE = "log"
 CONFIG_RETRIEVAL_PERIOD = "period"
 CONFIG_RETRIEVAL_SINCE = "since"
 
@@ -43,7 +42,6 @@ class CookieMonsterConfig:
     """
     class RetrievalConfig:
         def __init__(self):
-            self.log_database = None    # type: str
             self.period = None  # type: float
             self.since = None   # type: datetime
 
@@ -104,7 +102,6 @@ def load_config(location: str) -> CookieMonsterConfig:
 
     config = CookieMonsterConfig()
 
-    config.retrieval.log_database = config_parser[CONFIG_RETRIEVAL].get(CONFIG_RETRIEVAL_LOG_DATABASE)
     config.retrieval.period = config_parser[CONFIG_RETRIEVAL].getfloat(CONFIG_RETRIEVAL_PERIOD)
     config.retrieval.since = datetime.fromtimestamp(config_parser[CONFIG_RETRIEVAL].getint(CONFIG_RETRIEVAL_SINCE))
 
