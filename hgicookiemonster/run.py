@@ -15,7 +15,6 @@ from cookiemonster.logging.influxdb.models import InfluxDBConnectionConfig
 from cookiemonster.logging.logger import PythonLoggingLogger, Logger
 from cookiemonster.monitor.cookiejar_monitor import CookieJarMonitor
 from cookiemonster.monitor.threads_monitor import ThreadsMonitor
-from cookiemonster.notifications.notification_receiver import NotificationReceiverSource
 from cookiemonster.processor._enrichment import EnrichmentLoaderSource
 from cookiemonster.processor._rules import RuleSource
 from cookiemonster.processor.basic_processing import BasicProcessorManager
@@ -53,17 +52,12 @@ def run(config_location):
     # Setup Slack client
     slack = Slack(config.slack.token, config.slack.default_channel, config.slack.default_username)
 
-    # Define what resources rules, notification receivers and enrichment loaders can access
+    # Define what resources rules and enrichment loaders can access
     resource_accessor = HgiCookieMonsterResourceAccessor(cookie_jar, config, slack)
 
     # Setup rules source
     rules_source = RuleSource(config.processing.rules_location, resource_accessor)
     rules_source.start()
-
-    # Setup notification receiver source
-    notification_receivers_source = NotificationReceiverSource(
-        config.processing.notification_receivers_location, resource_accessor)
-    notification_receivers_source.start()
 
     # Setup enrichment loader source
     enrichment_loader_source = EnrichmentLoaderSource(config.processing.enrichment_loaders_location, resource_accessor)
@@ -71,7 +65,7 @@ def run(config_location):
 
     # Setup the data processor manager
     processor_manager = BasicProcessorManager(cookie_jar, rules_source, enrichment_loader_source,
-                                              notification_receivers_source, config.processing.max_threads, logger)
+                                              config.processing.max_threads, logger)
 
     # Connect components to the cookie jar
     _connect_retrieval_manager_to_cookie_jar(retrieval_manager, cookie_jar, config.cookie_jar.max_requests_per_second,

@@ -1,8 +1,9 @@
 from datetime import datetime
 
+from baton._baton.json import DataObjectJSONEncoder
 from baton.api import connect_to_irods_with_baton
-from baton.json import DataObjectJSONEncoder
-from cookiemonster import Cookie, Enrichment, EnrichmentLoader
+from cookiemonster.common.models import Cookie, Enrichment
+from cookiemonster.processor.models import EnrichmentLoader
 from hgicommon.collections import Metadata
 from hgicommon.data_source import register
 
@@ -12,8 +13,7 @@ IRODS_SOURCE = "irods"
 
 
 def _can_enrich(cookie: Cookie, resource_accessor: HgiCookieMonsterResourceAccessor) -> bool:
-    if len(cookie.enrichments) == 0:
-        return False
+
     if cookie.enrichments[-1] != IRODS_SOURCE:
         return True
 

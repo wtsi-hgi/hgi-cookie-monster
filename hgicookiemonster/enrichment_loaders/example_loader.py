@@ -1,6 +1,7 @@
 from datetime import datetime
 
-from cookiemonster import EnrichmentLoader, Cookie, Enrichment
+from cookiemonster.common.models import Cookie, Enrichment
+from cookiemonster.processor.models import EnrichmentLoader
 from hgicommon.collections import Metadata
 from hgicommon.data_source import register
 from hgicommon.mixable import Priority

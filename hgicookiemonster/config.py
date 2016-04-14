@@ -13,7 +13,6 @@ CONFIG_COOKIEJAR_MAX_REQUESTS_PER_SECOND = "max_requests_per_second"
 CONFIG_PROCESSING = "processing"
 CONFIG_PROCESSING_MAX_THREADS = "max_threads"
 CONFIG_PROCESSING_RULES = "rules"
-CONFIG_PROCESSING_NOTIFICATION_RECEIVERS = "notification_receivers"
 CONFIG_PROCESSING_ENRICHMENT_LOADERS = "enrichment_loaders"
 
 CONFIG_BATON = "baton"
@@ -56,7 +55,6 @@ class CookieMonsterConfig:
             self.max_threads = None   # type: int
             self.rules_location = None   # type: str
             self.enrichment_loaders_location = None   # type: str
-            self.notification_receivers_location = None   # type: str
 
     class BatonConfig:
         def __init__(self):
@@ -111,8 +109,6 @@ def load_config(location: str) -> CookieMonsterConfig:
     config.processing.rules_location = config_parser[CONFIG_PROCESSING].get(CONFIG_PROCESSING_RULES)
     config.processing.enrichment_loaders_location = config_parser[CONFIG_PROCESSING].get(
         CONFIG_PROCESSING_ENRICHMENT_LOADERS)
-    config.processing.notification_receivers_location = config_parser[CONFIG_PROCESSING].get(
-        CONFIG_PROCESSING_NOTIFICATION_RECEIVERS)
 
     config.cookie_jar.url = config_parser[CONFIG_COOKIEJAR].get(CONFIG_COOKIEJAR_URL)
     config.cookie_jar.database = config_parser[CONFIG_COOKIEJAR].get(CONFIG_COOKIEJAR_DATABASE)
