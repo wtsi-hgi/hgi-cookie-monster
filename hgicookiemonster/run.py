@@ -35,7 +35,7 @@ def run(config_location):
     config = load_config(config_location)
 
     # Setup measurement logging
-    logging_buffer_latency = timedelta(seconds=10)      # TODO: Make into a setting
+    logging_buffer_latency = timedelta(seconds=config.influxdb.buffer_latency)
     influxdb_config = InfluxDBConnectionConfig(config.influxdb.host, config.influxdb.port, config.influxdb.username,
                                                config.influxdb.password, config.influxdb.database)
     logger = InfluxDBLogger(influxdb_config, buffer_latency=logging_buffer_latency)

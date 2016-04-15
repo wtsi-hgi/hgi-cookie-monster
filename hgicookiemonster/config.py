@@ -28,6 +28,7 @@ CONFIG_INFLUXDB_PORT = "port"
 CONFIG_INFLUXDB_USERNAME = "username"
 CONFIG_INFLUXDB_PASSWORD = "password"
 CONFIG_INFLUXDB_DATABASE = "database"
+CONFIG_INFLUXDB_BUFFER_LATENCY = "buffer_latency"
 
 CONFIG_SLACK = "slack"
 CONFIG_SLACK_TOKEN = "token"
@@ -72,6 +73,7 @@ class CookieMonsterConfig:
             self.username = None    # type: str
             self.password = None    # type: str
             self.database = None    # type: str
+            self.buffer_latency = None  # type: int
 
     class SlackConfig:
         def __init__(self):
@@ -125,6 +127,7 @@ def load_config(location: str) -> CookieMonsterConfig:
     config.influxdb.username = config_parser[CONFIG_INFLUXDB].get(CONFIG_INFLUXDB_USERNAME)
     config.influxdb.password = config_parser[CONFIG_INFLUXDB].get(CONFIG_INFLUXDB_PASSWORD)
     config.influxdb.database = config_parser[CONFIG_INFLUXDB].get(CONFIG_INFLUXDB_DATABASE)
+    config.influxdb.buffer_latency = config_parser[CONFIG_INFLUXDB].getint(CONFIG_INFLUXDB_BUFFER_LATENCY)
 
     config.slack.token = config_parser[CONFIG_SLACK].get(CONFIG_SLACK_TOKEN)
     config.slack.default_channel = config_parser[CONFIG_SLACK].get(CONFIG_SLACK_DEFAULT_CHANNEL)
