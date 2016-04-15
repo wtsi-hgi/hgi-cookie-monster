@@ -19,11 +19,11 @@ def _can_enrich(cookie: Cookie, resource_accessor: HgiCookieMonsterResourceAcces
 
 def _load_enrichment(cookie: Cookie, resource_accessor: HgiCookieMonsterResourceAccessor) -> Enrichment:
     _irods = connect_to_irods_with_baton(resource_accessor.config.baton.binaries_location)
-    data_object = _irods.data_object.get_by_path(cookie.identifier)[0]
+    data_object = _irods.data_object.get_by_path(cookie.identifier)
     data_object_as_json = DataObjectJSONEncoder().default(data_object)
-    resource_accessor.slack.post_message("Added more information about %s from iRODS")
+    resource_accessor.slack.post_message("Added more information about %s from iRODS" % cookie.identifier)
     return Enrichment(IRODS_SOURCE, datetime.now(), Metadata(data_object_as_json))
 
 
-_enrichment_loader = EnrichmentLoader(_can_enrich, _load_enrichment, priority=0, name="example")
+_enrichment_loader = EnrichmentLoader(_can_enrich, _load_enrichment, priority=0, name=IRODS_SOURCE)
 register(_enrichment_loader)
