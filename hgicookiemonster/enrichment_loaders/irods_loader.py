@@ -13,7 +13,6 @@ IRODS_SOURCE = "irods"
 
 
 def _can_enrich(cookie: Cookie, resource_accessor: HgiCookieMonsterResourceAccessor) -> bool:
-
     if cookie.enrichments[-1] != IRODS_SOURCE:
         return True
 
@@ -26,5 +25,5 @@ def _load_enrichment(cookie: Cookie, resource_accessor: HgiCookieMonsterResource
     return Enrichment(IRODS_SOURCE, datetime.now(), Metadata(data_object_as_json))
 
 
-_enrichment_loader = EnrichmentLoader(_can_enrich, _load_enrichment, priority=0)
+_enrichment_loader = EnrichmentLoader(_can_enrich, _load_enrichment, priority=0, name="example")
 register(_enrichment_loader)

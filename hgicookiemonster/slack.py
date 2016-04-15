@@ -5,7 +5,7 @@ _SLACK_CLIENT_POST_MESSAGE = "chat.postMessage"
 
 class Slack:
     """
-    TODO
+    Basic slack client.git
     """
     def __init__(self, token: str, default_channel: str, default_username: str):
         """
@@ -18,9 +18,10 @@ class Slack:
 
     def post_message(self, message: str, channel: str=None, username: str=None):
         """
-        TODO
-        :param channel:
-        :param username:
+        Post the given message to the given channel as the given username.
+        :param message: the message to post
+        :param channel: the channel to post to
+        :param username: the username to post as
         """
         if channel is None:
             channel = self._default_channel
@@ -28,6 +29,3 @@ class Slack:
             username = self._default_username
 
         self._slack_client.api_call(_SLACK_CLIENT_POST_MESSAGE, channel=channel, text=message, username=username)
-
-
-Slack("xoxp-2344385931-10295687988-26253588880-bd5719aad3", "test", "Cookie Monster").post_message("test")

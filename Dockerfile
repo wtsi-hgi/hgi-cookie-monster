@@ -8,7 +8,7 @@ COPY hgicookiemonster ./hgicookiemonster/
 
 # pip can go die in a fire
 RUN pip uninstall -y cookiemonster \
-                     baton-python-wrapper
+                     baton
 RUN pip install -r requirements.txt
 RUN curl $(sed -rn "s|^git\+https://github.com/(.+).git@(.+)#egg=.+$|https://raw.githubusercontent.com/\1/\2/requirements.txt|p" requirements.txt) \
   | xargs pip install

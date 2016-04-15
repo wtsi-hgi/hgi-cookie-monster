@@ -17,5 +17,5 @@ def _load_enrichment(cookie: Cookie, resource_accessor: HgiCookieMonsterResource
     return Enrichment("my_source_name", datetime.now(), Metadata())
 
 
-_enrichment_loader = EnrichmentLoader(_can_enrich, _load_enrichment, Priority.MAX_PRIORITY)
+_enrichment_loader = EnrichmentLoader(_can_enrich, _load_enrichment, Priority.MAX_PRIORITY, name="example")
 register(_enrichment_loader)
