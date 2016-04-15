@@ -1,4 +1,4 @@
-FROM wtsi-hgi/cookie-monster
+FROM mercury/cookie-monster:latest
 MAINTAINER "C. Monster Esq." <cmonster@sanger.ac.uk>
 
 # Install HGI Cookie Monster implementation

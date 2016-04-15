@@ -4,25 +4,18 @@ The HGI implementation of Cookie Monster.
 
 # Containerised Setup
 
-1. Build the [`docker-baton`](https://github.com/wtsi-hgi/docker-baton)
-   image using the HGI `feature/specificquery` fork of baton, with the
-   tag `wtsi-hgi/baton:0.16.1-specificquery`.
-
-2. Build the [`docker-cookie-monster`](https://github.com/wtsi-hgi/docker-cookie-monster)
-   image, with the tag `wtsi-hgi/cookie-monster`.
-
-3. Build the image from this repository, using the tag
+1. Build the Docker image from this repository, using the tag
    `wtsi-hgi/the-monster`.
 
-4. Ensure your Cookie Monster `setup.conf` is specified per
+2. Ensure your Cookie Monster `setup.conf` is specified per
    `setup.example.conf`.
 
-5. Ensure your iRODS environment configuration file
+3. Ensure your iRODS environment configuration file
    (`~/.irods/.irodsEnv`) has Kerberos authentication disabled by
    removing any `irodsAuthScheme 'KRB'` line. Your `~/.irods` directory
    will ultimately be bind mounted into the Docker container.
 
-6. Start the Docker container in interactive mode, with the `~/.irods`
+4. Start the Docker container in interactive mode, with the `~/.irods`
    bind mount:
 
    ```sh
@@ -37,7 +30,7 @@ The HGI implementation of Cookie Monster.
    which will be reciprocated on the host. Note that the ownership of
    the host's iRODS configuration will change to `root`.
 
-7. Now you can run the container. To avoid having to rebuild the image
+5. Now you can run the container. To avoid having to rebuild the image
    when changes need to be made to the rules, enrichment loaders or
    notification receivers, they can also be bind mounted:
 
