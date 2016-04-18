@@ -6,14 +6,14 @@ from hgicommon.collections import Metadata
 from hgicommon.data_source import register
 from hgicommon.mixable import Priority
 
-from hgicookiemonster.resource_accessor import HgiCookieMonsterResourceAccessor
+from hgicookiemonster.context import HgiContext
 
 
-def _can_enrich(cookie: Cookie, resource_accessor: HgiCookieMonsterResourceAccessor) -> bool:
+def _can_enrich(cookie: Cookie, context: HgiContext) -> bool:
     return False
 
 
-def _load_enrichment(cookie: Cookie, resource_accessor: HgiCookieMonsterResourceAccessor) -> Enrichment:
+def _load_enrichment(cookie: Cookie, context: HgiContext) -> Enrichment:
     return Enrichment("my_source_name", datetime.now(), Metadata())
 
 

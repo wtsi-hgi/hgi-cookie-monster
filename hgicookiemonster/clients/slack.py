@@ -3,20 +3,20 @@ from slackclient import SlackClient
 _SLACK_CLIENT_POST_MESSAGE = "chat.postMessage"
 
 
-class Slack:
+class BasicSlackClient:
     """
     Basic slack client.git
     """
     def __init__(self, token: str, default_channel: str, default_username: str):
         """
         Constructor.
-        :param token: authentication tocken from Slack
+        :param token: authentication tocken from BasicSlackClient
         """
         self._default_channel = default_channel
         self._default_username = default_username
         self._slack_client = SlackClient(token)
 
-    def post_message(self, message: str, channel: str=None, username: str=None):
+    def post(self, message: str, channel: str=None, username: str=None):
         """
         Post the given message to the given channel as the given username.
         :param message: the message to post

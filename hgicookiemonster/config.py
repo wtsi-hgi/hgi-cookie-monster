@@ -35,6 +35,12 @@ CONFIG_SLACK_TOKEN = "token"
 CONFIG_SLACK_DEFAULT_CHANNEL = "default_channel"
 CONFIG_SLACK_DEFAULT_USERNAME = "default_username"
 
+CONFIG_MESSAGE_QUEUE = "message_queue"
+CONFIG_MESSAGE_QUEUE_HOST = "host"
+CONFIG_MESSAGE_QUEUE_PORT = "port"
+CONFIG_MESSAGE_QUEUE_USERNAME = "username"
+CONFIG_MESSAGE_QUEUE_PASSWORD = "password"
+
 
 class CookieMonsterConfig:
     """
@@ -81,6 +87,14 @@ class CookieMonsterConfig:
             self.default_channel = None     # type: str
             self.default_username = None     # type: str
 
+    class MessageQueueConfig:
+        def __init__(self):
+            self.host = None  # type: str
+            self.port = None  # type: int
+            self.username = None  # type: str
+            self.password = None  # type: str
+            self.database = None  # type: str
+
     def __init__(self):
         self.retrieval = CookieMonsterConfig.RetrievalConfig()
         self.cookie_jar = CookieMonsterConfig.CookieJarConfig()
@@ -89,6 +103,7 @@ class CookieMonsterConfig:
         self.api = CookieMonsterConfig.ApiConfig()
         self.influxdb = CookieMonsterConfig.InfluxDBConfig()
         self.slack = CookieMonsterConfig.SlackConfig()
+        self.message_queue = CookieMonsterConfig.MessageQueueConfig()
 
 
 def load_config(location: str) -> CookieMonsterConfig:
@@ -132,5 +147,10 @@ def load_config(location: str) -> CookieMonsterConfig:
     config.slack.token = config_parser[CONFIG_SLACK].get(CONFIG_SLACK_TOKEN)
     config.slack.default_channel = config_parser[CONFIG_SLACK].get(CONFIG_SLACK_DEFAULT_CHANNEL)
     config.slack.default_username = config_parser[CONFIG_SLACK].get(CONFIG_SLACK_DEFAULT_USERNAME)
+
+    config.message_queue.host = config_parser[CONFIG_MESSAGE_QUEUE].get(CONFIG_MESSAGE_QUEUE_HOST)
+    config.message_queue.port = config_parser[CONFIG_MESSAGE_QUEUE].get(CONFIG_MESSAGE_QUEUE_PORT)
+    config.message_queue.username = config_parser[CONFIG_MESSAGE_QUEUE].get(CONFIG_MESSAGE_QUEUE_USERNAME)
+    config.message_queue.password = config_parser[CONFIG_MESSAGE_QUEUE].get(CONFIG_MESSAGE_QUEUE_PASSWORD)
 
     return config
