@@ -1,4 +1,4 @@
-from cookiemonster.common.resource_accessor import ResourceAccessor
+from cookiemonster.common.context import Context
 from cookiemonster.cookiejar import CookieJar
 
 from hgicookiemonster.clients.message_queue import BasicMessageQueue
@@ -6,7 +6,7 @@ from hgicookiemonster.clients.slack import BasicSlackClient
 from hgicookiemonster.config import CookieMonsterConfig
 
 
-class HgiContext(ResourceAccessor):
+class HgiContext(Context):
     """
     Context for HGI Cookie Monster's rules, notification receivers and enrichment loaders.
     """
