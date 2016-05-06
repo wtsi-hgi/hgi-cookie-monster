@@ -138,7 +138,7 @@ def load_config(location: str) -> CookieMonsterConfig:
     config.api.port = config_parser[CONFIG_API].getint(CONFIG_API_PORT)
 
     config.influxdb.host = config_parser[CONFIG_INFLUXDB].get(CONFIG_INFLUXDB_HOST)
-    config.influxdb.port = config_parser[CONFIG_INFLUXDB].get(CONFIG_INFLUXDB_PORT)
+    config.influxdb.port = config_parser[CONFIG_INFLUXDB].getint(CONFIG_INFLUXDB_PORT)
     config.influxdb.username = config_parser[CONFIG_INFLUXDB].get(CONFIG_INFLUXDB_USERNAME)
     config.influxdb.password = config_parser[CONFIG_INFLUXDB].get(CONFIG_INFLUXDB_PASSWORD)
     config.influxdb.database = config_parser[CONFIG_INFLUXDB].get(CONFIG_INFLUXDB_DATABASE)
@@ -149,7 +149,7 @@ def load_config(location: str) -> CookieMonsterConfig:
     config.slack.default_username = config_parser[CONFIG_SLACK].get(CONFIG_SLACK_DEFAULT_USERNAME)
 
     config.message_queue.host = config_parser[CONFIG_MESSAGE_QUEUE].get(CONFIG_MESSAGE_QUEUE_HOST)
-    config.message_queue.port = config_parser[CONFIG_MESSAGE_QUEUE].get(CONFIG_MESSAGE_QUEUE_PORT)
+    config.message_queue.port = config_parser[CONFIG_MESSAGE_QUEUE].getint(CONFIG_MESSAGE_QUEUE_PORT)
     config.message_queue.username = config_parser[CONFIG_MESSAGE_QUEUE].get(CONFIG_MESSAGE_QUEUE_USERNAME)
     config.message_queue.password = config_parser[CONFIG_MESSAGE_QUEUE].get(CONFIG_MESSAGE_QUEUE_PASSWORD)
 
