@@ -5,13 +5,13 @@ class BasicMessageQueue:
     """
     Basic message queue client (e.g. for use with RabbitMQ).
     """
-    def __init__(self, username: str, password: str, host: str, port: int):
+    def __init__(self, host: str, port: int, username: str, password: str):
         """
         Constructor.
-        :param username: username for message broker
-        :param password: username for message broker
         :param host: location of message broker
         :param port: port message broker runs on
+        :param username: username for message broker
+        :param password: username for message broker
         """
         credentials = PlainCredentials(username, password)
         self._connection_parameters = ConnectionParameters(host, port, credentials=credentials)
