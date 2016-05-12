@@ -3,10 +3,12 @@ import logging
 import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
+from os import environ
 from threading import Lock
 
 from cookiemonster.common.collections import UpdateCollection
 from cookiemonster.common.models import Enrichment
+from cookiemonster.contrib.connection_pool import patch_http_connection_pool
 from cookiemonster.cookiejar import CookieJar, RateLimitedBiscuitTin
 from cookiemonster.cookiejar.logging_cookie_jar import add_cookie_jar_logging
 from cookiemonster.elmo import HTTP_API, APIDependency
@@ -40,6 +42,12 @@ def run(config_location):
     influxdb_config = InfluxDBConnectionConfig(config.influxdb.host, config.influxdb.port, config.influxdb.username,
                                                config.influxdb.password, config.influxdb.database)
     logger = InfluxDBLogger(influxdb_config, buffer_latency=logging_buffer_latency)
+
+    # Set HTTP connection pool size (for CouchDB)
+    # NOTE This is taken from an environment variable, as it's not
+    # something that would probably need tweaking that much:
+    pool_size = int(environ.get('COOKIEMONSTER_HTTP_POOL_SIZE', 16))
+    patch_http_connection_pool(maxsize=pool_size)
 
     # Setup cookie jar
     cookie_jar = RateLimitedBiscuitTin(config.cookie_jar.max_requests_per_second, config.cookie_jar.url,
