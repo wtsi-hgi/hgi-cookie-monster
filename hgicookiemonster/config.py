@@ -118,7 +118,8 @@ def load_config(location: str) -> CookieMonsterConfig:
     config = CookieMonsterConfig()
 
     config.retrieval.period = config_parser[CONFIG_RETRIEVAL].getfloat(CONFIG_RETRIEVAL_PERIOD)
-    config.retrieval.since = datetime.fromtimestamp(config_parser[CONFIG_RETRIEVAL].getint(CONFIG_RETRIEVAL_SINCE))
+    config.retrieval.since = datetime.fromtimestamp(config_parser[CONFIG_RETRIEVAL].getint(
+        CONFIG_RETRIEVAL_SINCE, fallback=int(datetime.now().timestamp())))
 
     config.processing.max_threads = config_parser[CONFIG_PROCESSING].getint(
         CONFIG_PROCESSING_MAX_THREADS)
