@@ -17,6 +17,8 @@ _irods_connections = BoundedSemaphore(MAX_IRODS_CONNECTIONS)
 
 
 def _can_enrich(cookie: Cookie, context: HgiContext) -> bool:
+    if cookie.enrichments[-1].source == IRODS_SOURCE:
+        return False
     return cookie.identifier.endswith(".bam") or cookie.identifier.endswith(".cram")
 
 
