@@ -3,7 +3,7 @@ from cookiemonster.processor.models import Rule
 from hgicommon.data_source import register
 from hgicommon.mixable import Priority
 
-from hgicookiemonster.enrichment_loaders.irods_loader_disabled import IRODS_SOURCE
+from hgicookiemonster.enrichment_loaders.irods_loader import IRODS_SOURCE
 from hgicookiemonster.context import HgiContext
 
 INTERESTING_COOKIE = "interesting"
