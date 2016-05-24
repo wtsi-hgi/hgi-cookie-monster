@@ -142,7 +142,7 @@ def _connect_retrieval_manager_to_cookie_jar(retrieval_manager: RetrievalManager
     def put_updates_in_cookie_jar(update_collection: UpdateCollection):
         nonlocal still_to_enrich
         for update in update_collection:
-            enrichment = Enrichment("irods_update", datetime.now(), update.metadata)
+            enrichment = Enrichment("irods_update", update.timestamp, update.metadata)
             with still_to_enrich_lock:
                 still_to_enrich += 1
                 logger.record(MEASUREMENT_STILL_TO_ENRICH, still_to_enrich)
