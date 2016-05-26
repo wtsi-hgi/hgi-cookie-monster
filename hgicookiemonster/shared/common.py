@@ -4,7 +4,7 @@ from cookiemonster.retriever.source.irods.models import DataObjectModification
 from hgicookiemonster.enrichment_loaders._irods import IRODS_ENRICHMENT
 from hgicookiemonster.run import IRODS_UPDATE_ENRICHMENT
 
-_STUDY_ID_KEY = "study_id"
+IRODS_STUDY_ID_KEY = "study_id"
 
 
 def has_irods_update_enrichment_followed_by_irods_enrichment(cookie: Cookie) -> bool:
@@ -39,7 +39,7 @@ def study_with_id_in_latest_irods_update(id: str, cookie: Cookie) -> bool:
         irods_update_enrichment.metadata)  # type: DataObjectModification
     modified_metadata = data_object_modification.modified_metadata
 
-    if _STUDY_ID_KEY not in modified_metadata:
+    if IRODS_STUDY_ID_KEY not in modified_metadata:
         return False
 
-    return id in modified_metadata[_STUDY_ID_KEY]
+    return id in modified_metadata[IRODS_STUDY_ID_KEY]
