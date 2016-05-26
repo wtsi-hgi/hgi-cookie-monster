@@ -19,8 +19,7 @@ def has_irods_update_enrichment_followed_by_irods_enrichment(cookie: Cookie) -> 
     irods_update_enrichment = cookie.enrichments[-2]
     irods_enrichment = cookie.enrichments[-1]
 
-    if not (irods_update_enrichment.source == IRODS_UPDATE_ENRICHMENT and irods_enrichment.source == IRODS_ENRICHMENT):
-        return False
+    return irods_update_enrichment.source == IRODS_UPDATE_ENRICHMENT and irods_enrichment.source == IRODS_ENRICHMENT
 
 
 def study_with_id_in_latest_irods_update(id: str, cookie: Cookie) -> bool:
