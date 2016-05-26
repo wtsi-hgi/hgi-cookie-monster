@@ -1,6 +1,7 @@
 from cookiemonster.common.models import Cookie
 from cookiemonster.retriever.source.irods.json import DataObjectModificationJSONDecoder
 from cookiemonster.retriever.source.irods.models import DataObjectModification
+from hgicommon.collections import Metadata
 from hgicookiemonster.enrichment_loaders._irods import IRODS_ENRICHMENT
 from hgicookiemonster.run import IRODS_UPDATE_ENRICHMENT
 
@@ -22,7 +23,7 @@ def has_irods_update_enrichment_followed_by_irods_enrichment(cookie: Cookie) -> 
     return irods_update_enrichment.source == IRODS_UPDATE_ENRICHMENT and irods_enrichment.source == IRODS_ENRICHMENT
 
 
-def study_with_id_in_latest_irods_update(id: str, cookie: Cookie) -> bool:
+def study_with_id_in_most_recent_irods_update(id: str, cookie: Cookie) -> bool:
     """
     Decides whether the Cookie shows that metadata was added in the iRODS update to indicate that the updated iRODS
     entity belongs to the study with the given ID.
@@ -35,7 +36,8 @@ def study_with_id_in_latest_irods_update(id: str, cookie: Cookie) -> bool:
     if irods_update_enrichment is None:
         return False
 
-    data_object_modification = DataObjectModificationJSONDecoder().decode(
+    assert isinstance(irods_update_enrichment.metadata, Metadata)
+    data_object_modification = DataObjectModificationJSONDecoder().decode_parsed(
         irods_update_enrichment.metadata)  # type: DataObjectModification
     modified_metadata = data_object_modification.modified_metadata
 

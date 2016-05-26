@@ -7,14 +7,14 @@ from hgicommon.mixable import Priority
 from hgicookiemonster.context import HgiContext
 from hgicookiemonster.enrichment_loaders.irods_loader import IRODS_ENRICHMENT
 from hgicookiemonster.shared.common import has_irods_update_enrichment_followed_by_irods_enrichment, \
-    study_with_id_in_latest_irods_update
+    study_with_id_in_most_recent_irods_update
 
 
 def _matches(cookie: Cookie, context: HgiContext) -> bool:
     if not has_irods_update_enrichment_followed_by_irods_enrichment(cookie):
         return False
 
-    if not study_with_id_in_latest_irods_update("3543", cookie):
+    if not study_with_id_in_most_recent_irods_update("3543", cookie):
         return False
 
     irods_enrichment = cookie.get_most_recent_enrichment_from_source(IRODS_ENRICHMENT)
