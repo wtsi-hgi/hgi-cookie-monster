@@ -60,12 +60,12 @@ def run(config_location):
     retrieval_manager = PeriodicRetrievalManager(config.retrieval.period, update_mapper, logger)
 
     # # Setup basic Slack client
-    # slack = BasicSlackClient(config.slack.token, config.slack.default_channel, config.slack.default_username)
+    slack = BasicSlackClient(config.slack.token, config.slack.default_channel, config.slack.default_username)
     #
     # # Setup basic message queue (e.g. RabbitMQ) client
     # message_queue = BasicMessageQueue(config.message_queue.host, config.message_queue.port,
     #                                   config.message_queue.username, config.message_queue.password)
-    slack = message_queue = None
+    message_queue = None
 
     # Define the context that rules and enrichment loaders has access to
     context = HgiContext(cookie_jar, config, slack, message_queue)
