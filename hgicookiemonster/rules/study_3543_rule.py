@@ -6,6 +6,7 @@ from hgicommon.data_source import register
 from hgicommon.mixable import Priority
 from hgicookiemonster.context import HgiContext
 from hgicookiemonster.enrichment_loaders.irods_loader import IRODS_ENRICHMENT
+from hgicookiemonster.run import IRODS_UPDATE_ENRICHMENT
 from hgicookiemonster.shared.common import has_irods_update_enrichment_followed_by_irods_enrichment, \
     study_with_id_in_most_recent_irods_update
 
@@ -30,7 +31,9 @@ def _matches(cookie: Cookie, context: HgiContext) -> bool:
 
 
 def _action(cookie: Cookie, context: HgiContext) -> bool:
-    context.slack.post("New data object in iRODS for study 3543 (PAGE): %s" % cookie.identifier)
+    timestamp = cookie.get_most_recent_enrichment_from_source(IRODS_UPDATE_ENRICHMENT).timestamp
+    context.slack.post("Additional library in iRODS for study 3543 (PAGE) at %s: %s" % (timestamp, cookie.identifier))
+    return False
 
 
 _rule = Rule(_matches, _action, Priority.MAX_PRIORITY, "study_3543")
