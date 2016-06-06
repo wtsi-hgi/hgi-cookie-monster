@@ -4,16 +4,11 @@ from hgicommon.data_source import register
 
 from hgicookiemonster.context import HgiContext
 from hgicookiemonster.enrichment_loaders._irods import load_enrichment_from_irods, IRODS_ENRICHMENT
+from hgicookiemonster.shared.common import study_with_id_in_most_recent_irods_update
 
 
 def _can_enrich(cookie: Cookie, context: HgiContext) -> bool:
-    if cookie.enrichments[-1].source == IRODS_ENRICHMENT:
-        return False
-
-    if not cookie.identifier.startswith("/seq/illumina/library_merge"):
-        return False
-
-    return cookie.identifier.endswith(".bam") or cookie.identifier.endswith(".cram")
+    return cookie.enrichments[-1].source != IRODS_ENRICHMENT and study_with_id_in_most_recent_irods_update("3765", cookie)
 
 
 _enrichment_loader = EnrichmentLoader(_can_enrich, load_enrichment_from_irods, name=IRODS_ENRICHMENT, priority=0)
