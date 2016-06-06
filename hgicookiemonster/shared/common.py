@@ -1,3 +1,6 @@
+from baton._baton.json import DataObjectJSONDecoder
+from baton.models import DataObject
+
 from cookiemonster.common.models import Cookie
 from cookiemonster.retriever.source.irods.json import DataObjectModificationJSONDecoder
 from cookiemonster.retriever.source.irods.models import DataObjectModification
@@ -6,6 +9,9 @@ from hgicookiemonster.enrichment_loaders._irods import IRODS_ENRICHMENT
 from hgicookiemonster.run import IRODS_UPDATE_ENRICHMENT
 
 IRODS_STUDY_ID_KEY = "study_id"
+
+IRODS_TARGET_KEY = "target"
+IRODS_TARGET_LIBRARY_VALUE = "library"
 
 
 def has_irods_update_enrichment_followed_by_irods_enrichment(cookie: Cookie) -> bool:
@@ -45,3 +51,24 @@ def study_with_id_in_most_recent_irods_update(id: str, cookie: Cookie) -> bool:
         return False
 
     return id in modified_metadata[IRODS_STUDY_ID_KEY]
+
+
+def tagged_as_library_in_irods(cookie: Cookie) -> bool:
+    """
+    Whether the entity the cookie relates to has been tagged as a library in iRODS via the "target" metadata key.
+
+    The cookie must have at least one enrichment from iRODS; only the most recent enrichment from this source will be
+    used.
+    :param cookie: the cookie of interest
+    :return: whether the cookie indicates the entity is tagged as a library in iRODS
+    """
+    irods_enrichment = cookie.get_most_recent_enrichment_from_source(IRODS_ENRICHMENT)
+    assert irods_enrichment is not None
+
+    data_object_as_dict = dict(irods_enrichment.metadata)
+    data_object = DataObjectJSONDecoder().decode_parsed(data_object_as_dict)
+    assert isinstance(data_object, DataObject)
+
+    if IRODS_TARGET_KEY not in data_object.metadata:
+        return False
+    return IRODS_TARGET_LIBRARY_VALUE in data_object.metadata[IRODS_TARGET_KEY]
