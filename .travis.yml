@@ -18,9 +18,9 @@ before_install:
   - sudo apt-get install -y -o Dpkg::Options::=--force-confdef docker-engine
 
 install:
-  - pip install -r requirements.txt
   - curl $(sed -rn "s|^git\+https://github.com/(.+).git@(.+)#egg=.+$|https://raw.githubusercontent.com/\1/\2/requirements.txt|p" requirements.txt) | xargs pip install
-  - pip install -r test_requirements.txt
+  - pip install -U -r requirements.txt
+  - pip install -U -r test_requirements.txt
 
 script:
   - nosetests -v --with-coverage --cover-package=hgicookiemonster --cover-inclusive
