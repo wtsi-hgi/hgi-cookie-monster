@@ -9,9 +9,9 @@ COPY hgicookiemonster ./hgicookiemonster/
 # pip can go die in a fire
 RUN pip uninstall -y cookiemonster \
                      baton
-RUN pip install -r requirements.txt
 RUN curl $(sed -rn "s|^git\+https://github.com/(.+).git@(.+)#egg=.+$|https://raw.githubusercontent.com/\1/\2/requirements.txt|p" requirements.txt) \
   | xargs pip install
+RUN pip install -U -r requirements.txt
 
 EXPOSE 5000
 ENTRYPOINT ["./the_monster.sh"]
