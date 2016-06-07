@@ -2,7 +2,7 @@ from baton._baton.json import DataObjectJSONDecoder
 from baton.models import DataObject
 
 from cookiemonster.common.models import Cookie
-from cookiemonster.retriever.source.irods.json import DataObjectModificationJSONDecoder
+from cookiemonster.retriever.source.irods.json_convert import DataObjectModificationJSONDecoder
 from cookiemonster.retriever.source.irods.models import DataObjectModification
 from hgicommon.collections import Metadata
 from hgicookiemonster.enrichment_loaders._irods import IRODS_ENRICHMENT

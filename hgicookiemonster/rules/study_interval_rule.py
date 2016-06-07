@@ -24,5 +24,5 @@ def _action(cookie: Cookie, context: HgiContext) -> bool:
     return False
 
 
-_rule = Rule(_matches, _action, Priority.MAX_PRIORITY, name="interval")
+_rule = Rule(_matches, _action, "interval", Priority.MAX_PRIORITY)
 register(_rule)

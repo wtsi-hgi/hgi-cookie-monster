@@ -16,5 +16,5 @@ def _can_enrich(cookie: Cookie, context: HgiContext) -> bool:
     return cookie.identifier.endswith(".bam") or cookie.identifier.endswith(".cram")
 
 
-_enrichment_loader = EnrichmentLoader(_can_enrich, load_enrichment_from_irods, name=IRODS_ENRICHMENT, priority=0)
+_enrichment_loader = EnrichmentLoader(_can_enrich, load_enrichment_from_irods, IRODS_ENRICHMENT, priority=0)
 register(_enrichment_loader)

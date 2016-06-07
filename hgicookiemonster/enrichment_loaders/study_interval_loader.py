@@ -11,5 +11,5 @@ def _can_enrich(cookie: Cookie, context: HgiContext) -> bool:
     return cookie.enrichments[-1].source != IRODS_ENRICHMENT and study_with_id_in_most_recent_irods_update("3765", cookie)
 
 
-_enrichment_loader = EnrichmentLoader(_can_enrich, load_enrichment_from_irods, name=IRODS_ENRICHMENT, priority=0)
+_enrichment_loader = EnrichmentLoader(_can_enrich, load_enrichment_from_irods, IRODS_ENRICHMENT, priority=0)
 register(_enrichment_loader)
