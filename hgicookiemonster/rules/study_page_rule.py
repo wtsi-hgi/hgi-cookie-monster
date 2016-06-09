@@ -7,7 +7,7 @@ from hgicookiemonster.run import IRODS_UPDATE_ENRICHMENT
 from hgicookiemonster.shared.common import extract_latest_metadata_key_value_known_in_irods
 from hgicookiemonster.shared.constants.irods import IRODS_TARGET_KEY, IRODS_TARGET_LIBRARY_VALUE, IRODS_STUDY_ID_KEY
 
-STUDY_INTERVAL_RULE_ID = "page"
+STUDY_INTERVAL_RULE_ID = "study_page"
 STUDY_INTERVAL_RULE_PRIORITY = Priority.MIN_PRIORITY
 
 INTERVAL_STUDY_ID = "3543"
@@ -16,6 +16,8 @@ INTERVAL_STUDY_ID = "3543"
 def _matches(cookie: Cookie, context: HgiContext) -> bool:
     study_id = extract_latest_metadata_key_value_known_in_irods(cookie.enrichments, IRODS_STUDY_ID_KEY)
     target = extract_latest_metadata_key_value_known_in_irods(cookie.enrichments, IRODS_TARGET_KEY)
+    if study_id is None or target is None:
+        return False
     return IRODS_TARGET_LIBRARY_VALUE in target and INTERVAL_STUDY_ID in study_id
 
 

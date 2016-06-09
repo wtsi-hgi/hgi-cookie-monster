@@ -1,9 +1,10 @@
 from copy import deepcopy
 from datetime import datetime
+from typing import Iterable
 
 from baton.json import DataObjectJSONEncoder
 from baton.collections import IrodsMetadata, DataObjectReplicaCollection
-from baton.models import DataObject, DataObjectReplica
+from baton.models import DataObject, DataObjectReplica, AccessControl
 from cookiemonster.common.models import Enrichment
 from cookiemonster.retriever.source.irods.json_convert import DataObjectModificationJSONEncoder
 from cookiemonster.retriever.source.irods.models import DataObjectModification
@@ -35,3 +36,30 @@ def create_creation_enrichment(timestamp: datetime) -> Enrichment:
     :return: the created enrichment
     """
     return Enrichment(IRODS_UPDATE_ENRICHMENT, timestamp, deepcopy(CREATION_DATA_OBJECT_MODIFICATION_AS_METADATA))
+
+
+def create_data_object_modification_as_metadata(
+        modified_metadata: IrodsMetadata=None, modified_replicas: DataObjectReplicaCollection=None) -> Metadata:
+    """
+    TODO
+    :param modified_metadata:
+    :param modified_replicas:
+    :return:
+    """
+    data_object_modification = DataObjectModification(
+        modified_metadata=modified_metadata, modified_replicas=modified_replicas)
+    data_object_modification_as_dict = DataObjectModificationJSONEncoder().default(data_object_modification)
+    return Metadata(data_object_modification_as_dict)
+
+
+def create_data_object_as_metadata(access_controls: Iterable[AccessControl]=(), metadata: IrodsMetadata=None,
+                 replicas: Iterable[DataObjectReplica]=()) -> Metadata:
+    """
+    TODO
+    :param modified_metadata:
+    :param modified_replicas:
+    :return:
+    """
+    data_object = DataObject("/path", access_controls=access_controls, metadata=metadata, replicas=replicas)
+    data_object_as_dict = DataObjectJSONEncoder().default(data_object)
+    return Metadata(data_object_as_dict)
