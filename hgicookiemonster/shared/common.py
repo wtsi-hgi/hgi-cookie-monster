@@ -7,7 +7,8 @@ from cookiemonster.retriever.source.irods.json_convert import DataObjectModifica
 from cookiemonster.retriever.source.irods.models import DataObjectModification
 from hgicookiemonster.enrichment_loaders._irods import IRODS_ENRICHMENT
 from hgicookiemonster.run import IRODS_UPDATE_ENRICHMENT
-from hgicookiemonster.shared.constants.irods import IRODS_FIRST_REPLICA_TO_BE_CREATED_VALUE
+from hgicookiemonster.shared.constants.irods import IRODS_FIRST_REPLICA_TO_BE_CREATED_VALUE, IRODS_STUDY_ID_KEY, \
+    IRODS_TARGET_KEY, IRODS_TARGET_LIBRARY_VALUE
 
 
 def was_creation_observed(enrichments: EnrichmentCollection) -> bool:
@@ -48,3 +49,17 @@ def extract_latest_metadata_key_value_known_in_irods(enrichments: EnrichmentColl
                 value = irods_metadata[key]
 
     return value
+
+
+def relates_to_library_in_study(enrichments: EnrichmentCollection, study_id: str) -> bool:
+    """
+    Whether the enrichments indicate a relation to a library in the given study.
+    :param enrichments: the enrichments
+    :param study_id: the study of interest
+    :return: whether the enrichments indicate to a library in the given study
+    """
+    extracted_study_id = extract_latest_metadata_key_value_known_in_irods(enrichments, IRODS_STUDY_ID_KEY)
+    extracted_target = extract_latest_metadata_key_value_known_in_irods(enrichments, IRODS_TARGET_KEY)
+    if extracted_study_id is None or extracted_target is None:
+        return False
+    return IRODS_TARGET_LIBRARY_VALUE in extracted_target and study_id in extracted_study_id
