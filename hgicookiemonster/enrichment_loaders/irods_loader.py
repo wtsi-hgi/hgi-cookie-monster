@@ -7,13 +7,8 @@ from hgicookiemonster.enrichment_loaders._irods import load_enrichment_from_irod
 
 
 def _can_enrich(cookie: Cookie, context: HgiContext) -> bool:
-    if cookie.enrichments[-1].source == IRODS_ENRICHMENT:
-        return False
-
-    if not cookie.identifier.startswith("/seq/illumina/library_merge"):
-        return False
-
-    return cookie.identifier.endswith(".bam") or cookie.identifier.endswith(".cram")
+    """Enrich from iRODS if not enriched from there before."""
+    return IRODS_ENRICHMENT not in [enrichment.source for enrichment in cookie.enrichments]
 
 
 _enrichment_loader = EnrichmentLoader(_can_enrich, load_enrichment_from_irods, IRODS_ENRICHMENT, priority=0)

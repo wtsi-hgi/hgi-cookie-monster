@@ -12,8 +12,9 @@ from hgicommon.collections import Metadata
 from hgicookiemonster.enrichment_loaders._irods import IRODS_ENRICHMENT
 from hgicookiemonster.run import IRODS_UPDATE_ENRICHMENT
 from hgicookiemonster.shared.common import has_irods_update_enrichment_followed_by_irods_enrichment, \
-    study_with_id_in_most_recent_irods_update, IRODS_STUDY_ID_KEY, tagged_as_library_in_irods, IRODS_TARGET_KEY, \
+    study_with_id_in_most_recent_irods_update, tagged_as_library_in_irods, IRODS_TARGET_KEY, \
     IRODS_TARGET_LIBRARY_VALUE
+from hgicookiemonster.shared.constants import IRODS_STUDY_ID_KEY, IRODS_TARGET_KEY, IRODS_TARGET_LIBRARY_VALUE
 
 _COOKIE_IDENTIFIER = "my_identifier"
 

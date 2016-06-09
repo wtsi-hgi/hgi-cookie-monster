@@ -4,25 +4,27 @@ from hgicommon.data_source import register
 from hgicommon.mixable import Priority
 from hgicookiemonster.context import HgiContext
 from hgicookiemonster.run import IRODS_UPDATE_ENRICHMENT
-from hgicookiemonster.shared.common import has_irods_update_enrichment_followed_by_irods_enrichment, \
-    study_with_id_in_most_recent_irods_update, tagged_as_library_in_irods
+from hgicookiemonster.shared.common import extract_latest_metadata_key_value_known_in_irods
+from hgicookiemonster.shared.constants.irods import IRODS_TARGET_KEY, IRODS_TARGET_LIBRARY_VALUE, IRODS_STUDY_ID_KEY
+
+STUDY_INTERVAL_RULE_ID = "interval"
+STUDY_INTERVAL_RULE_PRIORITY = Priority.MIN_PRIORITY
+
+INTERVAL_STUDY_ID = "3765"
 
 
 def _matches(cookie: Cookie, context: HgiContext) -> bool:
-    if not has_irods_update_enrichment_followed_by_irods_enrichment(cookie):
-        return False
-
-    if not study_with_id_in_most_recent_irods_update("3765", cookie):
-        return False
-
-    return tagged_as_library_in_irods(cookie)
+    study_id = extract_latest_metadata_key_value_known_in_irods(cookie.enrichments, IRODS_STUDY_ID_KEY)
+    target = extract_latest_metadata_key_value_known_in_irods(cookie.enrichments, IRODS_TARGET_KEY)
+    return IRODS_TARGET_LIBRARY_VALUE in target and INTERVAL_STUDY_ID in study_id
 
 
 def _action(cookie: Cookie, context: HgiContext) -> bool:
-    timestamp = cookie.get_most_recent_enrichment_from_source(IRODS_UPDATE_ENRICHMENT).timestamp
-    context.slack.post("Additional library in iRODS for study 3765 (INTERVAL) at %s: %s" % (timestamp, cookie.identifier))
+    timestamp = cookie.enrichments.get_most_recent_from_source(IRODS_UPDATE_ENRICHMENT).timestamp
+    context.slack.post("Additional library in iRODS for study %s (INTERVAL) at %s: %s"
+                       % (INTERVAL_STUDY_ID, timestamp, cookie.identifier))
     return False
 
 
-_rule = Rule(_matches, _action, "interval", Priority.MAX_PRIORITY)
+_rule = Rule(_matches, _action, STUDY_INTERVAL_RULE_ID, STUDY_INTERVAL_RULE_PRIORITY)
 register(_rule)

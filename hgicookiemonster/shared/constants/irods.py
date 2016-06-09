@@ -1,0 +1,6 @@
+IRODS_STUDY_ID_KEY = "study_id"
+IRODS_TARGET_KEY = "target"
+IRODS_REFERENCE_KEY = "reference"
+IRODS_MANUAL_QC_KEY = "manual_qc"
+
+IRODS_TARGET_LIBRARY_VALUE = "library"
