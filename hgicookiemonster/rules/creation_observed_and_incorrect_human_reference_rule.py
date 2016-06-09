@@ -9,8 +9,8 @@ from hgicookiemonster.rules.not_cram_rule import NOT_CRAM_RULE_PRIORITY
 from hgicookiemonster.shared.common import was_creation_observed, extract_latest_metadata_key_value_known_in_irods
 from hgicookiemonster.shared.constants.irods import IRODS_REFERENCE_KEY
 
-CREATION_OBSERVED_BUT_INCORRECT_HUMAN_REFERENCE_RULE_ID = "creation_observed_but_incorrect_human_reference"
-CREATION_OBSERVED_BUT_INCORRECT_HUMAN_REFERENCE_RULE_PRIORITY = NOT_CRAM_RULE_PRIORITY + 1
+CREATION_OBSERVED_AND_INCORRECT_HUMAN_REFERENCE_RULE_ID = "creation_observed_and_incorrect_human_reference"
+CREATION_OBSERVED_AND_INCORRECT_HUMAN_REFERENCE_RULE_PRIORITY = NOT_CRAM_RULE_PRIORITY + 1
 
 KNOWN_UNINTERESTING_REFERENCES_PATH = normpath(join(dirname(realpath(__file__)), "resources/non-human-species.txt"))
 
@@ -51,6 +51,6 @@ def _action(cookie: Cookie, context: HgiContext) -> bool:
     return True
 
 
-_rule = Rule(_matches, _action, CREATION_OBSERVED_BUT_INCORRECT_HUMAN_REFERENCE_RULE_ID,
-             CREATION_OBSERVED_BUT_INCORRECT_HUMAN_REFERENCE_RULE_PRIORITY)
+_rule = Rule(_matches, _action, CREATION_OBSERVED_AND_INCORRECT_HUMAN_REFERENCE_RULE_ID,
+             CREATION_OBSERVED_AND_INCORRECT_HUMAN_REFERENCE_RULE_PRIORITY)
 register(_rule)

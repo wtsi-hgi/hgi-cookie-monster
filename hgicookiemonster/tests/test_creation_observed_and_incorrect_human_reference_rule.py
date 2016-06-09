@@ -10,7 +10,7 @@ from cookiemonster.retriever.source.irods.json_convert import DataObjectModifica
 from cookiemonster.retriever.source.irods.models import DataObjectModification
 from hgicommon.collections import Metadata
 from hgicookiemonster.enrichment_loaders._irods import IRODS_ENRICHMENT
-from hgicookiemonster.rules.creation_observed_but_incorrect_human_reference_rule import _rule, \
+from hgicookiemonster.rules.creation_observed_and_incorrect_human_reference_rule import _rule, \
     KNOWN_UNINTERESTING_REFERENCES_PATH
 from hgicookiemonster.run import IRODS_UPDATE_ENRICHMENT
 from hgicookiemonster.shared.constants.irods import IRODS_REFERENCE_KEY
@@ -20,9 +20,10 @@ from hgicookiemonster.tests._common import UNINTERESTING_DATA_OBJECT_MODIFICATIO
 with open(KNOWN_UNINTERESTING_REFERENCES_PATH, "r") as file:
     _VALID_REFERENCE = "/somewhere/references/%s/reference.fa" % file.readline().strip()
 
-class TestCreationObservedByIncorrectHumanReferenceRule(unittest.TestCase):
+
+class TestCreationObservedAndIncorrectHumanReferenceRule(unittest.TestCase):
     """
-    Test for `creation_observed_but_incorrect_human_reference` rule.
+    Test for `creation_observed_and_incorrect_human_reference` rule.
     """
     def setUp(self):
         self.rule = _rule  # type: Rule
@@ -40,11 +41,11 @@ class TestCreationObservedByIncorrectHumanReferenceRule(unittest.TestCase):
             Enrichment(IRODS_UPDATE_ENRICHMENT, datetime(1, 1, 1), UNINTERESTING_DATA_OBJECT_MODIFICATION_AS_METADATA))
         self.assertFalse(self.rule.matches(self.cookie))
 
-    def test_no_match_when_created_but_no_reference_defined(self):
+    def test_no_match_when_created_but_no_reference(self):
         self.cookie.enrichments.add(create_creation_enrichment(datetime(1, 1, 1)))
         self.assertFalse(self.rule.matches(self.cookie))
 
-    def test_no_match_when_created_but_unknown_reference_defined(self):
+    def test_no_match_when_created_but_unknown_reference(self):
         modification = DataObjectModification(IrodsMetadata({IRODS_REFERENCE_KEY: {"/reference/unknown/something.fa"}}))
         modification_as_metadata = Metadata(DataObjectModificationJSONEncoder().default(modification))
         self.cookie.enrichments.add([
@@ -53,7 +54,7 @@ class TestCreationObservedByIncorrectHumanReferenceRule(unittest.TestCase):
         ])
         self.assertFalse(self.rule.matches(self.cookie))
 
-    def test_no_match_when_created_but_multiple_references_defined(self):
+    def test_no_match_when_created_but_multiple_references(self):
         modification = DataObjectModification(
             IrodsMetadata({IRODS_REFERENCE_KEY: {_VALID_REFERENCE, "/reference/unknown/something.fa"}}))
         modification_as_metadata = Metadata(DataObjectModificationJSONEncoder().default(modification))
@@ -63,7 +64,7 @@ class TestCreationObservedByIncorrectHumanReferenceRule(unittest.TestCase):
         ])
         self.assertFalse(self.rule.matches(self.cookie))
 
-    def test_match_when_created_and_reference_defined_in_update(self):
+    def test_match_when_created_and_reference_in_update(self):
         modification = DataObjectModification(IrodsMetadata({IRODS_REFERENCE_KEY: {_VALID_REFERENCE}}))
         modification_as_metadata = Metadata(DataObjectModificationJSONEncoder().default(modification))
         self.cookie.enrichments.add([
@@ -72,7 +73,7 @@ class TestCreationObservedByIncorrectHumanReferenceRule(unittest.TestCase):
         ])
         self.assertTrue(self.rule.matches(self.cookie))
 
-    def test_match_when_created_and_reference_defined_in_irods(self):
+    def test_match_when_created_and_reference_in_irods(self):
         data_object = DataObject("/path", metadata=IrodsMetadata({IRODS_REFERENCE_KEY: {_VALID_REFERENCE}}))
         data_object_as_metadata = Metadata(DataObjectJSONEncoder().default(data_object))
         self.cookie.enrichments.add([
