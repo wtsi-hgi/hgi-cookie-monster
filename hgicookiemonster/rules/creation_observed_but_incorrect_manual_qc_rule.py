@@ -8,12 +8,15 @@ from hgicookiemonster.shared.common import was_creation_observed, extract_latest
 CREATION_OBSERVED_BUT_INCORRECT_MANUAL_QC = "creation_observed_but_incorrect_manual_qc"
 CREATION_OBSERVED_BUT_INCORRECT_MANUAL_QC_RULE_PRIORITY = NOT_CRAM_RULE_PRIORITY + 1
 
-_INCORRECT_MANUAL_QC_VALUE = 1
+_INCORRECT_MANUAL_QC_VALUE = 0
 _IRODS_MANUAL_QC_KEY = "manual_qc"
 
 
 def _matches(cookie: Cookie, context: HgiContext) -> bool:
-    """Matches if the creation has been observed but there manual QC has not been set to 1."""
+    """
+    Matches if the creation has been observed and the manual QC has been set to an incorrect value. The order of these
+    events is not considered.
+    """
     if not was_creation_observed(cookie.enrichments):
         return False
 
