@@ -1,155 +1,162 @@
 import unittest
 from datetime import datetime
-from typing import Dict
 
-from baton._baton.json import DataObjectJSONEncoder
-from baton.collections import IrodsMetadata
-from baton.models import DataObject
-from cookiemonster.common.models import Cookie, Enrichment
+from baton.json import DataObjectJSONEncoder
+from baton.collections import IrodsMetadata, DataObjectReplicaCollection
+from baton.models import DataObjectReplica, DataObject
+from cookiemonster.common.collections import EnrichmentCollection
+from cookiemonster.common.models import Enrichment
 from cookiemonster.retriever.source.irods.json_convert import DataObjectModificationJSONEncoder
 from cookiemonster.retriever.source.irods.models import DataObjectModification
 from hgicommon.collections import Metadata
 from hgicookiemonster.enrichment_loaders._irods import IRODS_ENRICHMENT
 from hgicookiemonster.run import IRODS_UPDATE_ENRICHMENT
-from hgicookiemonster.shared.common import has_irods_update_enrichment_followed_by_irods_enrichment, \
-    study_with_id_in_most_recent_irods_update, tagged_as_library_in_irods, IRODS_TARGET_KEY, \
-    IRODS_TARGET_LIBRARY_VALUE
-from hgicookiemonster.shared.constants import IRODS_STUDY_ID_KEY, IRODS_TARGET_KEY, IRODS_TARGET_LIBRARY_VALUE
+from hgicookiemonster.shared.common import was_creation_observed, extract_latest_metadata_key_value_known_in_irods
+from hgicookiemonster.shared.constants.irods import IRODS_FIRST_REPLICA_TO_BE_CREATED_VALUE
+from hgicookiemonster.tests._common import UNINTERESTING_DATA_OBJECT_MODIFICATION_AS_METADATA, \
+    UNINTERESTING_DATA_OBJECT_AS_METADATA
 
-_COOKIE_IDENTIFIER = "my_identifier"
+_METADATA_KEY = "key"
 
 
-class TestHasIrodsUpdateEnrichmentFollowedByIrodsEnrichment(unittest.TestCase):
+class TestWasCreationObserved(unittest.TestCase):
     """
-    Tests for `has_irods_update_enrichment_followed_by_irods_enrichment`.
+    Tests for `was_creation_observed`.
     """
     def setUp(self):
-        self.cookie = Cookie(_COOKIE_IDENTIFIER)
-        self.irods_enrichment = Enrichment(IRODS_ENRICHMENT, datetime(10, 10, 10), Metadata())
-        self.irods_update_enrichment = Enrichment(IRODS_UPDATE_ENRICHMENT, datetime(10, 10, 10), Metadata())
+        self.enrichment_collection = EnrichmentCollection()
 
     def test_no_enrichments(self):
-        self.assertFalse(has_irods_update_enrichment_followed_by_irods_enrichment(self.cookie))
+        self.assertFalse(was_creation_observed(self.enrichment_collection))
 
-    def test_only_irods_enrichment(self):
-        self.cookie.enrich(self.irods_enrichment)
-        self.assertFalse(has_irods_update_enrichment_followed_by_irods_enrichment(self.cookie))
+    def test_unrelated_enrichment(self):
+        self.enrichment_collection.add(Enrichment("other", datetime(1, 1, 1), Metadata()))
+        self.assertFalse(was_creation_observed(self.enrichment_collection))
 
-    def test_only_irods_enrichment_followed_by_irods_update_enrichment(self):
-        self.irods_enrichment.timestamp = self.irods_enrichment.timestamp.replace(year=5)
-        assert self.irods_enrichment.timestamp < self.irods_update_enrichment.timestamp
-        self.cookie.enrich(self.irods_enrichment)
-        self.cookie.enrich(self.irods_update_enrichment)
-        self.assertFalse(has_irods_update_enrichment_followed_by_irods_enrichment(self.cookie))
+    def test_no_creation_observed(self):
+        modified_replicas = DataObjectReplicaCollection(
+            {DataObjectReplica(IRODS_FIRST_REPLICA_TO_BE_CREATED_VALUE + 1, "")})
+        unrelated_modification = DataObjectModification(IrodsMetadata({"other": {"value"}}), modified_replicas)
+        unrelated_modification_as_dict = DataObjectModificationJSONEncoder().default(unrelated_modification)
+        self.enrichment_collection.add([
+            Enrichment(IRODS_UPDATE_ENRICHMENT, datetime(1, 1, 1), UNINTERESTING_DATA_OBJECT_MODIFICATION_AS_METADATA),
+            Enrichment(IRODS_UPDATE_ENRICHMENT, datetime(2, 2, 2), Metadata(unrelated_modification_as_dict)),
+            Enrichment(IRODS_UPDATE_ENRICHMENT, datetime(3, 3, 3), UNINTERESTING_DATA_OBJECT_MODIFICATION_AS_METADATA),
+        ])
+        self.assertFalse(was_creation_observed(self.enrichment_collection))
 
-    def test_irods_update_enrichment_followed_by_irods_enrichment(self):
-        self.irods_update_enrichment.timestamp = self.irods_update_enrichment.timestamp.replace(year=5)
-        assert self.irods_update_enrichment.timestamp < self.irods_enrichment.timestamp
-        self.cookie.enrich(self.irods_enrichment)
-        self.cookie.enrich(self.irods_update_enrichment)
-        self.assertTrue(has_irods_update_enrichment_followed_by_irods_enrichment(self.cookie))
-
-    def test_irods_update_enrichment_followed_by_irods_enrichment_when_not_latest(self):
-        self.irods_update_enrichment.timestamp = self.irods_update_enrichment.timestamp.replace(year=5)
-        assert self.irods_update_enrichment.timestamp < self.irods_enrichment.timestamp
-        self.cookie.enrich(self.irods_enrichment)
-        self.cookie.enrich(self.irods_update_enrichment)
-        self.cookie.enrich(Enrichment("other", datetime(1, 1, 1), Metadata()))
-        self.assertTrue(has_irods_update_enrichment_followed_by_irods_enrichment(self.cookie))
+    def test_creation_observed(self):
+        modified_replicas = DataObjectReplicaCollection(
+            {DataObjectReplica(IRODS_FIRST_REPLICA_TO_BE_CREATED_VALUE, "")})
+        modification = DataObjectModification(IrodsMetadata({"other": {"value"}}), modified_replicas)
+        modification_as_dict = DataObjectModificationJSONEncoder().default(modification)
+        self.enrichment_collection.add([
+            Enrichment(IRODS_UPDATE_ENRICHMENT, datetime(1, 1, 1), UNINTERESTING_DATA_OBJECT_MODIFICATION_AS_METADATA),
+            Enrichment(IRODS_UPDATE_ENRICHMENT, datetime(2, 2, 2), Metadata(modification_as_dict)),
+            Enrichment(IRODS_UPDATE_ENRICHMENT, datetime(3, 3, 3), UNINTERESTING_DATA_OBJECT_MODIFICATION_AS_METADATA),
+        ])
+        self.assertTrue(was_creation_observed(self.enrichment_collection))
 
 
-class TestStudyWithIdInLatestIrodsUpdate(unittest.TestCase):
+class TestExtractLatestMetadataKeyValueKnownInIrods(unittest.TestCase):
     """
-    Tests for `study_with_id_in_latest_irods_update`.
+    Tests for `extract_latest_metadata_key_value_known_in_irods`.
     """
-    @staticmethod
-    def _create_irods_update_metadata_for_metadata_modification(modified_metadata: IrodsMetadata) -> Metadata:
-        """
-        Creates metadata for an iRODS update when the given data object metadata is modified.
-        :param modified_metadata: the modified metadata
-        :return: representation of metadata modification when retrieved via iRODS update
-        """
-        data_object_modification = DataObjectModification(modified_metadata)
-        data_object_modification_as_dict = DataObjectModificationJSONEncoder().default(data_object_modification)
-        return Metadata(data_object_modification_as_dict)
-
     def setUp(self):
-        self.study_id = "123"
-        self.cookie = Cookie(_COOKIE_IDENTIFIER)
-        self.other_enrichment = Enrichment(IRODS_ENRICHMENT, datetime(10, 10, 10), Metadata())
-        self.irods_update_enrichment = Enrichment(IRODS_UPDATE_ENRICHMENT, datetime(10, 10, 10), Metadata())
+        self.enrichment_collection = EnrichmentCollection()
+        interesting_modifications = [
+            DataObjectModification(IrodsMetadata({_METADATA_KEY: {0}})),
+            DataObjectModification(IrodsMetadata({_METADATA_KEY: {1}}))
+        ]
+        encoder = DataObjectModificationJSONEncoder()
+        self.interesting_modifications_as_metadata = [
+            Metadata(encoder.default(modification)) for modification in interesting_modifications
+        ]
+
+        interesting_data_objects = [
+            DataObject("/path-1", metadata=IrodsMetadata({_METADATA_KEY: {2}})),
+            DataObject("/path-2", metadata=IrodsMetadata({_METADATA_KEY: {3}}))
+        ]
+        encoder = DataObjectJSONEncoder()
+        self.interesting_data_objects_as_metadata = [
+            Metadata(encoder.default(data_object)) for data_object in interesting_data_objects
+        ]
 
     def test_no_enrichments(self):
-        self.assertFalse(study_with_id_in_most_recent_irods_update(self.study_id, self.cookie))
+        self.assertIsNone(extract_latest_metadata_key_value_known_in_irods(self.enrichment_collection, _METADATA_KEY))
 
-    def test_no_irods_update_enrichments(self):
-        self.cookie.enrich(self.other_enrichment)
-        self.cookie.enrich(self.other_enrichment)
-        self.assertFalse(study_with_id_in_most_recent_irods_update(self.study_id, self.cookie))
+    def test_no_irods_related_enrichments(self):
+        self.enrichment_collection.add(Enrichment("other", datetime(1, 1, 1), Metadata()))
+        self.assertIsNone(extract_latest_metadata_key_value_known_in_irods(self.enrichment_collection, _METADATA_KEY))
 
-    def test_irods_update_with_metadata_but_no_study_id_key(self):
-        self.irods_update_enrichment.metadata = self._create_irods_update_metadata_for_metadata_modification(
-            IrodsMetadata({"other_key": {self.study_id}}))
-        self.cookie.enrich(self.irods_update_enrichment)
-        self.assertFalse(study_with_id_in_most_recent_irods_update(self.study_id, self.cookie))
+    def test_not_in_irods_update_enrichment(self):
+        enrichment = Enrichment(
+            IRODS_UPDATE_ENRICHMENT, datetime(1, 1, 1), Metadata(UNINTERESTING_DATA_OBJECT_MODIFICATION_AS_METADATA))
+        self.enrichment_collection.add(enrichment)
+        self.assertIsNone(extract_latest_metadata_key_value_known_in_irods(self.enrichment_collection, _METADATA_KEY))
 
-    def test_irods_update_with_other_study_id_key(self):
-        self.irods_update_enrichment.metadata = self._create_irods_update_metadata_for_metadata_modification(
-            IrodsMetadata({IRODS_STUDY_ID_KEY: {"%s2" % self.study_id}}))
-        self.cookie.enrich(self.irods_update_enrichment)
-        self.assertFalse(study_with_id_in_most_recent_irods_update(self.study_id, self.cookie))
+    def test_not_in_irods_enrichment(self):
+        enrichment = Enrichment(IRODS_ENRICHMENT, datetime(1, 1, 1), UNINTERESTING_DATA_OBJECT_AS_METADATA)
+        self.enrichment_collection.add(enrichment)
+        self.assertIsNone(extract_latest_metadata_key_value_known_in_irods(self.enrichment_collection, _METADATA_KEY))
 
-    def test_irods_update_with_study_id_key(self):
-        self.irods_update_enrichment.metadata = self._create_irods_update_metadata_for_metadata_modification(
-            IrodsMetadata({IRODS_STUDY_ID_KEY: {self.study_id}}))
-        self.cookie.enrich(self.irods_update_enrichment)
-        self.assertTrue(study_with_id_in_most_recent_irods_update(self.study_id, self.cookie))
+    def test_not_in_irods_enrichment_or_irods_update(self):
+        enrichments = [
+            Enrichment(IRODS_ENRICHMENT, datetime(1, 1, 1), UNINTERESTING_DATA_OBJECT_AS_METADATA),
+            Enrichment(
+                IRODS_UPDATE_ENRICHMENT, datetime(2, 2, 2),
+                Metadata(UNINTERESTING_DATA_OBJECT_MODIFICATION_AS_METADATA))
+        ]
+        self.enrichment_collection.add(enrichments)
+        self.assertIsNone(extract_latest_metadata_key_value_known_in_irods(self.enrichment_collection, _METADATA_KEY))
 
-    def test_irods_update_with_study_id_key_but_not_in_latest_irods_update(self):
-        self.irods_update_enrichment.metadata = self._create_irods_update_metadata_for_metadata_modification(
-            IrodsMetadata({IRODS_STUDY_ID_KEY: {self.study_id}}))
+    def test_in_irods_update_enrichments(self):
+        enrichments = [
+            Enrichment(IRODS_UPDATE_ENRICHMENT, datetime(1, 1, 1), self.interesting_modifications_as_metadata[0]),
+            Enrichment(IRODS_UPDATE_ENRICHMENT, datetime(2, 2, 2), self.interesting_modifications_as_metadata[1]),
+            Enrichment(IRODS_UPDATE_ENRICHMENT, datetime(3, 3, 3), UNINTERESTING_DATA_OBJECT_MODIFICATION_AS_METADATA),
+        ]
+        self.enrichment_collection.add(enrichments)
+        value = extract_latest_metadata_key_value_known_in_irods(self.enrichment_collection, _METADATA_KEY)
+        self.assertEqual(len(list(value)), 1)
+        self.assertIn(1, value)
 
-        more_recent_enrichment = Enrichment(IRODS_UPDATE_ENRICHMENT, datetime(20, 10, 10), Metadata())
-        more_recent_enrichment.metadata = self._create_irods_update_metadata_for_metadata_modification(
-            IrodsMetadata({IRODS_STUDY_ID_KEY: {"corrected_id"}}))
+    def test_in_irods_enrichments(self):
+        enrichments = [
+            Enrichment(IRODS_ENRICHMENT, datetime(1, 1, 1), self.interesting_data_objects_as_metadata[0]),
+            Enrichment(IRODS_ENRICHMENT, datetime(2, 2, 2), self.interesting_data_objects_as_metadata[1]),
+            Enrichment(IRODS_ENRICHMENT, datetime(3, 3, 3), UNINTERESTING_DATA_OBJECT_AS_METADATA),
+        ]
+        self.enrichment_collection.add(enrichments)
+        value = extract_latest_metadata_key_value_known_in_irods(self.enrichment_collection, _METADATA_KEY)
+        self.assertEqual(len(list(value)), 1)
+        self.assertIn(3, value)
 
-        self.cookie.enrich(self.irods_update_enrichment)
-        self.cookie.enrich(more_recent_enrichment)
-        self.assertFalse(study_with_id_in_most_recent_irods_update(self.study_id, self.cookie))
+    def test_in_irods_enrichments_and_irods_update_enrichments_when_most_recent_from_irods_enrichment(self):
+        enrichments = [
+            Enrichment(IRODS_ENRICHMENT, datetime(1, 1, 1), self.interesting_data_objects_as_metadata[0]),
+            Enrichment(IRODS_UPDATE_ENRICHMENT, datetime(2, 2, 2), self.interesting_modifications_as_metadata[0]),
+            Enrichment(IRODS_ENRICHMENT, datetime(3, 3, 3), UNINTERESTING_DATA_OBJECT_AS_METADATA),
+            Enrichment(IRODS_UPDATE_ENRICHMENT, datetime(4, 4, 4), self.interesting_modifications_as_metadata[1]),
+            Enrichment(IRODS_ENRICHMENT, datetime(5, 5, 5), self.interesting_data_objects_as_metadata[1])
+        ]
+        self.enrichment_collection.add(enrichments)
+        value = extract_latest_metadata_key_value_known_in_irods(self.enrichment_collection, _METADATA_KEY)
+        self.assertEqual(len(list(value)), 1)
+        self.assertIn(3, value)
 
-
-
-class TestTaggedAsLibraryInIrods(unittest.TestCase):
-    """
-    Tests for `tagged_as_library_in_irods`.
-    """
-    def setUp(self):
-        self.cookie = Cookie(_COOKIE_IDENTIFIER)
-        self.data_object = DataObject("/my/path", metadata=IrodsMetadata())
-
-    def test_no_target_defined_in_irods(self):
-        self._enrich_test_cookie_with_mock_irods_data(self.data_object)
-        self.assertFalse(tagged_as_library_in_irods(self.cookie))
-
-    def test_target_not_library(self):
-        self.data_object.metadata[IRODS_TARGET_KEY] = {"not_library", }
-        self._enrich_test_cookie_with_mock_irods_data(self.data_object)
-        self.assertFalse(tagged_as_library_in_irods(self.cookie))
-
-    def test_target_is_library(self):
-        self.data_object.metadata[IRODS_TARGET_KEY] = {IRODS_TARGET_LIBRARY_VALUE, }
-        self._enrich_test_cookie_with_mock_irods_data(self.data_object)
-        self.assertTrue(tagged_as_library_in_irods(self.cookie))
-
-    def _enrich_test_cookie_with_mock_irods_data(self, mock_irods_data_object: DataObject):
-        """
-        Enriches the test cookie with mock of iRODS enrichment.
-        :param mock_irods_data_object: the mock iRODs data
-        """
-        data_object_as_dict = DataObjectJSONEncoder().default(mock_irods_data_object)
-        assert isinstance(data_object_as_dict, Dict)
-        enrichment = Enrichment(IRODS_ENRICHMENT, datetime(1, 1, 1), Metadata(data_object_as_dict))
-        self.cookie.enrichments.append(enrichment)
+    def test_in_irods_enrichments_and_irods_update_enrichments_when_most_recent_from_irods_update_enrichment(self):
+        enrichments = [
+            Enrichment(IRODS_UPDATE_ENRICHMENT, datetime(1, 1, 1), self.interesting_modifications_as_metadata[0]),
+            Enrichment(IRODS_ENRICHMENT, datetime(2, 2, 2), self.interesting_data_objects_as_metadata[0]),
+            Enrichment(IRODS_ENRICHMENT, datetime(3, 3, 3), UNINTERESTING_DATA_OBJECT_AS_METADATA),
+            Enrichment(IRODS_ENRICHMENT, datetime(4, 4, 4), self.interesting_data_objects_as_metadata[1]),
+            Enrichment(IRODS_UPDATE_ENRICHMENT, datetime(5, 5, 5), self.interesting_modifications_as_metadata[1])
+        ]
+        self.enrichment_collection.add(enrichments)
+        value = extract_latest_metadata_key_value_known_in_irods(self.enrichment_collection, _METADATA_KEY)
+        self.assertEqual(len(list(value)), 1)
+        self.assertIn(1, value)
 
 
 if __name__ == "__main__":
