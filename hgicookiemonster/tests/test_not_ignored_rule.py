@@ -9,7 +9,7 @@ from cookiemonster.processor.json_convert import RuleApplicationLogJSONEncoder
 from cookiemonster.processor.models import Rule, RuleApplicationLog
 from cookiemonster.processor.processing import RULE_APPLICATION
 from hgicommon.collections import Metadata
-from hgicookiemonster.rules.not_ignored_rule import _rule, NOT_IGNORED_RULE_ID, NOT_IGNORED_LIST_LOCATION
+from hgicookiemonster.rules.not_ignored_rule import _rule, NOT_IGNORED_RULE_ID
 from hgicookiemonster.tests._common import create_creation_enrichment
 
 

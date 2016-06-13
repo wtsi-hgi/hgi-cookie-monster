@@ -42,7 +42,7 @@ def _action(cookie: Cookie, context: HgiContext) -> bool:
     return False
 
 
-class CookieLoadingDict(UserDict):
+class _CookieLoadingDict(UserDict):
     """
     Dictionary where keys should be identifiers to cookies that are accessible via the Cookie Monster API. Values are
     loaded from the API on-the-fly and cached.
@@ -71,7 +71,7 @@ class CookieLoadingDict(UserDict):
         cookie_as_json = json.loads(urlopen(request).read().decode("utf-8"))
         # FIXME: There should be a `CookieJSONDecoder`
         cookie = Cookie(identifier)
-        for enrichment in CookieLoadingDict._ENRICHMENT_JSON_DECODER.decode_parsed(cookie_as_json["enrichments"]):
+        for enrichment in _CookieLoadingDict._ENRICHMENT_JSON_DECODER.decode_parsed(cookie_as_json["enrichments"]):
             assert isinstance(enrichment, Enrichment)
             cookie.enrich(enrichment)
         return cookie
@@ -81,7 +81,7 @@ def read_not_ignored(cookie_monster_api_location: str, not_ignored_list_location
         -> Dict[str, Cookie]:
     """
     Gets not ignored cookies in a dict where the keys are the identifiers of the ignored cookies and the values are the
-    cookies themselves (loaded on-the-fly).
+    cookies themselves (loaded from the API on-the-fly).
     :param cookie_monster_api_location: the location of the Cookie Monster API
     :param not_ignored_list_location: the location of the not ignored list to read
     :return: not ignored cookies
@@ -89,8 +89,8 @@ def read_not_ignored(cookie_monster_api_location: str, not_ignored_list_location
     identifiers = []    # type: List[str]
     with open(not_ignored_list_location, "r") as file:
         for line in file:
-            identifiers.append(line)
-    return CookieLoadingDict(cookie_monster_api_location, identifiers)
+            identifiers.append(line.strip())
+    return _CookieLoadingDict(cookie_monster_api_location, identifiers)
 
 
 _rule = Rule(_matches, _action, NOT_IGNORED_RULE_ID, NOT_IGNORED_RULE_PRIORITY)
