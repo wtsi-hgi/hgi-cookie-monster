@@ -1,0 +1,4 @@
+from hgicookiemonster.rules.creation_observed_and_incorrect_human_reference_rule import \
+    CREATION_OBSERVED_AND_INCORRECT_HUMAN_REFERENCE_RULE_PRIORITY
+
+STUDY_RULE_PRIORITY = CREATION_OBSERVED_AND_INCORRECT_HUMAN_REFERENCE_RULE_PRIORITY + 1

@@ -2,13 +2,12 @@ from cookiemonster.common.models import Cookie
 from cookiemonster.processor.models import Rule
 from hgicommon.data_source import register
 from hgicookiemonster.context import HgiContext
-from hgicookiemonster.rules.creation_observed_and_incorrect_human_reference_rule import \
-    CREATION_OBSERVED_AND_INCORRECT_HUMAN_REFERENCE_RULE_PRIORITY
+from hgicookiemonster.rules._common import STUDY_RULE_PRIORITY
 from hgicookiemonster.run import IRODS_UPDATE_ENRICHMENT
 from hgicookiemonster.shared.common import relates_to_library_in_study
 
 STUDY_POMAK_RULE_ID = "study_pomak"
-STUDY_POMAK_RULE_PRIORITY = CREATION_OBSERVED_AND_INCORRECT_HUMAN_REFERENCE_RULE_PRIORITY + 1
+STUDY_POMAK_RULE_PRIORITY = STUDY_RULE_PRIORITY
 
 POMAK_STUDY_ID = "3597"
 
