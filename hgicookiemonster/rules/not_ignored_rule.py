@@ -84,7 +84,7 @@ def read_not_ignored(cookie_monster_api_location: str, not_ignored_list_location
     cookies themselves (loaded from the API on-the-fly).
     :param cookie_monster_api_location: the location of the Cookie Monster API
     :param not_ignored_list_location: the location of the not ignored list to read
-    :return: not ignored cookiesls
+    :return: not ignored cookies
     """
     identifiers = []    # type: List[str]
     with open(not_ignored_list_location, "r") as file:
