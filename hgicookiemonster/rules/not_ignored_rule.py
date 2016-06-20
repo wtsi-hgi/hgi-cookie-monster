@@ -36,9 +36,10 @@ def _matches(cookie: Cookie, context: HgiContext) -> bool:
 
 
 def _action(cookie: Cookie, context: HgiContext) -> bool:
-    """Write timestamp and identifier to tab separated file."""
+    """Write identifier to tab file."""
     with open(NOT_IGNORED_LIST_LOCATION, "a") as file:
         file.write("%s%s" % (cookie.identifier, os.linesep))
+        file.flush()
     return False
 
 
