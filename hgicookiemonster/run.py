@@ -90,6 +90,7 @@ def run(config_location):
     # Setup the HTTP API
     api = HTTP_API()
     api.inject(APIDependency.CookieJar, cookie_jar)
+    api.inject(APIDependency.System, None)
     api.listen(config.api.port)
 
     # Start the retrieval manager
