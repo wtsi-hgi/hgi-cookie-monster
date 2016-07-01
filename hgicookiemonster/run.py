@@ -10,6 +10,7 @@ from cookiemonster.common.collections import UpdateCollection
 from cookiemonster.common.models import Enrichment
 from cookiemonster.contrib.connection_pool import patch_http_connection_pool
 from cookiemonster.cookiejar import CookieJar, RateLimitedBiscuitTin
+from cookiemonster.cookiejar.biscuit_tin import add_couchdb_logging
 from cookiemonster.cookiejar.logging_cookie_jar import add_cookie_jar_logging
 from cookiemonster.elmo import HTTP_API, APIDependency
 from cookiemonster.logging.influxdb.logger import InfluxDBLogger
@@ -54,6 +55,7 @@ def run(config_location):
     cookie_jar = RateLimitedBiscuitTin(config.cookie_jar.max_requests_per_second, config.cookie_jar.url,
                                        config.cookie_jar.database)
     add_cookie_jar_logging(cookie_jar, logger)
+    add_couchdb_logging(cookie_jar, logger)
 
     # Setup data retrieval manager
     update_mapper = BatonUpdateMapper(config.baton.binaries_location, zone=config.baton.zone)
