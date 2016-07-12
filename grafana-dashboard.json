@@ -1042,7 +1042,7 @@
     {
       "collapse": false,
       "editable": true,
-      "height": "250px",
+      "height": "350px",
       "panels": [
         {
           "aliasColors": {},
@@ -1066,14 +1066,15 @@
           "id": 18,
           "isNew": true,
           "legend": {
-            "avg": false,
+            "avg": true,
             "current": true,
             "max": true,
             "min": false,
-            "rightSide": true,
+            "rightSide": false,
             "show": true,
             "total": false,
-            "values": true
+            "values": true,
+            "alignAsTable": true
           },
           "lines": true,
           "linewidth": 2,
@@ -1392,7 +1393,7 @@
           ],
           "timeFrom": null,
           "timeShift": null,
-          "title": "CouchDB Median Response Time",
+          "title": "CouchDB Response Time",
           "tooltip": {
             "shared": true,
             "value_type": "cumulative"
@@ -1403,7 +1404,10 @@
           "y_formats": [
             "s",
             "short"
-          ]
+          ],
+          "leftYAxisLabel": "Median Response Time",
+          "rightYAxisLabel": "",
+          "decimals": 2
         }
       ],
       "title": "New row"
@@ -1837,6 +1841,6 @@
   },
   "refresh": "5m",
   "schemaVersion": 8,
-  "version": 35,
+  "version": 38,
   "links": []
 }
