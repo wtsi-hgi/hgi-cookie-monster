@@ -53,7 +53,8 @@ def run(config_location):
 
     # Setup cookie jar
     cookie_jar = RateLimitedBiscuitTin(config.cookie_jar.max_requests_per_second, config.cookie_jar.url,
-                                       config.cookie_jar.database)
+                                       config.cookie_jar.database,
+                                       config.cookie_jar.buffer_capacity, config.cookie_jar.buffer_latency)
     add_cookie_jar_logging(cookie_jar, logger)
     add_couchdb_logging(cookie_jar, logger)
 

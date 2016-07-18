@@ -9,6 +9,8 @@ CONFIG_COOKIEJAR = "cookiejar"
 CONFIG_COOKIEJAR_URL = "url"
 CONFIG_COOKIEJAR_DATABASE = "database"
 CONFIG_COOKIEJAR_MAX_REQUESTS_PER_SECOND = "max_requests_per_second"
+CONFIG_COOKIEJAR_BUFFER_CAPACITY = "buffer_capacity"
+CONFIG_COOKIEJAR_BUFFER_LATENCY = "buffer_latency"
 
 CONFIG_PROCESSING = "processing"
 CONFIG_PROCESSING_MAX_THREADS = "max_threads"
@@ -56,6 +58,8 @@ class CookieMonsterConfig:
             self.url = None    # type: str
             self.database = None    # type: str
             self.max_requests_per_second = None     # type: int
+            self.buffer_capacity = None  # type: int
+            self.buffer_latency = None  # type: int
 
     class ProcessingConfig:
         def __init__(self):
@@ -132,6 +136,10 @@ def load_config(location: str) -> CookieMonsterConfig:
     config.cookie_jar.database = config_parser[CONFIG_COOKIEJAR].get(CONFIG_COOKIEJAR_DATABASE)
     config.cookie_jar.max_requests_per_second = config_parser[CONFIG_COOKIEJAR].getint(
         CONFIG_COOKIEJAR_MAX_REQUESTS_PER_SECOND)
+    config.cookie_jar.buffer_capacity = config_parser[CONFIG_COOKIEJAR].getint(
+        CONFIG_COOKIEJAR_BUFFER_CAPACITY, fallback=1000)
+    config.cookie_jar.buffer_latency = config_parser[CONFIG_COOKIEJAR].getint(
+        CONFIG_COOKIEJAR_BUFFER_LATENCY, fallback=250)
 
     config.baton.binaries_location = config_parser[CONFIG_BATON].get(CONFIG_BATON_BINARIES_LOCATION)
     config.baton.zone = config_parser[CONFIG_BATON].get(CONFIG_BATON_IRODS_ZONE)
