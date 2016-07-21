@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from configparser import ConfigParser
 
 CONFIG_RETRIEVAL = "retrieval"
@@ -59,7 +59,7 @@ class CookieMonsterConfig:
             self.database = None    # type: str
             self.max_requests_per_second = None     # type: int
             self.buffer_capacity = None  # type: int
-            self.buffer_latency = None  # type: int
+            self.buffer_latency = None  # type: timedelta
 
     class ProcessingConfig:
         def __init__(self):
@@ -138,8 +138,8 @@ def load_config(location: str) -> CookieMonsterConfig:
         CONFIG_COOKIEJAR_MAX_REQUESTS_PER_SECOND)
     config.cookie_jar.buffer_capacity = config_parser[CONFIG_COOKIEJAR].getint(
         CONFIG_COOKIEJAR_BUFFER_CAPACITY, fallback=1000)
-    config.cookie_jar.buffer_latency = config_parser[CONFIG_COOKIEJAR].getint(
-        CONFIG_COOKIEJAR_BUFFER_LATENCY, fallback=250)
+    config.cookie_jar.buffer_latency = timedelta(milliseconds=config_parser[CONFIG_COOKIEJAR].getint(
+        CONFIG_COOKIEJAR_BUFFER_LATENCY, fallback=250))
 
     config.baton.binaries_location = config_parser[CONFIG_BATON].get(CONFIG_BATON_BINARIES_LOCATION)
     config.baton.zone = config_parser[CONFIG_BATON].get(CONFIG_BATON_IRODS_ZONE)
