@@ -136,7 +136,13 @@ def _connect_retrieval_manager_to_cookie_jar(retrieval_manager: RetrievalManager
         nonlocal still_to_enrich
         logging.debug("Enriching \"%s\" with: %s" % (target, enrichment))
         started_at = time.monotonic()
-        cookie_jar.enrich_cookie(target, enrichment)
+
+        # TEMPORARY This is an attempt to isolate issue #47
+        try:
+            cookie_jar.enrich_cookie(target, enrichment)
+        except Exception:
+            logging.exception("Enrichment of \"%s\" failed!!", target)
+
         time_taken = time.monotonic() - started_at
         logger.record(MEASUREMENT_ENRICH_TIME, time_taken)
         logging.info("Took %f seconds (wall time) to enrich cookie with path \"%s\"" % (time_taken, target))
