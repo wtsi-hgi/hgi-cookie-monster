@@ -140,8 +140,9 @@ def _connect_retrieval_manager_to_cookie_jar(retrieval_manager: RetrievalManager
         # TEMPORARY This is an attempt to isolate issue #47
         try:
             cookie_jar.enrich_cookie(target, enrichment)
-        except Exception:
+        except:
             logging.exception("Enrichment of \"%s\" failed!!", target)
+            raise
 
         time_taken = time.monotonic() - started_at
         logger.record(MEASUREMENT_ENRICH_TIME, time_taken)
