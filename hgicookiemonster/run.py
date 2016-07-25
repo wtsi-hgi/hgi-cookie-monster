@@ -137,8 +137,10 @@ def _connect_retrieval_manager_to_cookie_jar(retrieval_manager: RetrievalManager
         logging.debug("Enriching \"%s\" with: %s" % (target, enrichment))
         started_at = time.monotonic()
 
-        # TEMPORARY This is an attempt to isolate issue #47
         try:
+            # Let's leave this here, as it's very important that the
+            # enrichment succeeds and we need to know about it in detail
+            # if/when it doesn't!
             cookie_jar.enrich_cookie(target, enrichment)
         except:
             logging.exception("Enrichment of \"%s\" failed!!", target)
