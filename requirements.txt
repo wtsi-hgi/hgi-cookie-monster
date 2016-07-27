@@ -1,4 +1,4 @@
 slackclient==1.0.0
 pika==0.10.0
-git+https://github.com/wtsi-hgi/cookie-monster.git@9d728f24c989b372c0229ef3febbd221fd509acb#egg=cookiemonster
+git+https://github.com/wtsi-hgi/cookie-monster.git@731dd178fda67aca4d8a40ec0879ac33eddaa759#egg=cookiemonster
 git+https://github.com/wtsi-hgi/python-baton-wrapper.git@fb35815209f560f9d587cebb5adb482e28df3803#egg=baton
