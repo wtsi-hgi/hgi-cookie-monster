@@ -1048,6 +1048,7 @@
           "aliasColors": {},
           "bars": false,
           "datasource": null,
+          "decimals": 2,
           "editable": true,
           "error": false,
           "fill": 1,
@@ -1065,7 +1066,9 @@
           },
           "id": 18,
           "isNew": true,
+          "leftYAxisLabel": "Median Response Time",
           "legend": {
+            "alignAsTable": true,
             "avg": true,
             "current": true,
             "max": true,
@@ -1073,8 +1076,7 @@
             "rightSide": false,
             "show": true,
             "total": false,
-            "values": true,
-            "alignAsTable": true
+            "values": true
           },
           "lines": true,
           "linewidth": 2,
@@ -1084,6 +1086,7 @@
           "pointradius": 5,
           "points": false,
           "renderer": "flot",
+          "rightYAxisLabel": "",
           "seriesOverrides": [],
           "span": 12,
           "stack": false,
@@ -1129,49 +1132,6 @@
                   "key": "function",
                   "operator": "=",
                   "value": "get"
-                }
-              ]
-            },
-            {
-              "alias": "Save Document",
-              "dsType": "influxdb",
-              "groupBy": [
-                {
-                  "params": [
-                    "$interval"
-                  ],
-                  "type": "time"
-                },
-                {
-                  "params": [
-                    "null"
-                  ],
-                  "type": "fill"
-                }
-              ],
-              "measurement": "couchdb",
-              "query": "SELECT median(\"value\") FROM \"couchdb\" WHERE \"function\" = 'save' AND $timeFilter GROUP BY time($interval) fill(null)",
-              "refId": "C",
-              "resultFormat": "time_series",
-              "select": [
-                [
-                  {
-                    "params": [
-                      "value"
-                    ],
-                    "type": "field"
-                  },
-                  {
-                    "params": [],
-                    "type": "median"
-                  }
-                ]
-              ],
-              "tags": [
-                {
-                  "key": "function",
-                  "operator": "=",
-                  "value": "save"
                 }
               ]
             },
@@ -1262,49 +1222,6 @@
               ]
             },
             {
-              "alias": "Bulk Delete",
-              "dsType": "influxdb",
-              "groupBy": [
-                {
-                  "params": [
-                    "$interval"
-                  ],
-                  "type": "time"
-                },
-                {
-                  "params": [
-                    "null"
-                  ],
-                  "type": "fill"
-                }
-              ],
-              "measurement": "couchdb",
-              "query": "SELECT median(\"value\") FROM \"couchdb\" WHERE \"function\" = 'delete_bulk' AND $timeFilter GROUP BY time($interval) fill(null)",
-              "refId": "E",
-              "resultFormat": "time_series",
-              "select": [
-                [
-                  {
-                    "params": [
-                      "value"
-                    ],
-                    "type": "field"
-                  },
-                  {
-                    "params": [],
-                    "type": "median"
-                  }
-                ]
-              ],
-              "tags": [
-                {
-                  "key": "function",
-                  "operator": "=",
-                  "value": "delete_bulk"
-                }
-              ]
-            },
-            {
               "alias": "View All",
               "dsType": "influxdb",
               "groupBy": [
@@ -1346,49 +1263,6 @@
                   "value": "all"
                 }
               ]
-            },
-            {
-              "alias": "Get Revisions",
-              "dsType": "influxdb",
-              "groupBy": [
-                {
-                  "params": [
-                    "$interval"
-                  ],
-                  "type": "time"
-                },
-                {
-                  "params": [
-                    "null"
-                  ],
-                  "type": "fill"
-                }
-              ],
-              "measurement": "couchdb",
-              "query": "SELECT median(\"value\") FROM \"couchdb\" WHERE \"function\" = 'revisions' AND $timeFilter GROUP BY time($interval) fill(null)",
-              "refId": "G",
-              "resultFormat": "time_series",
-              "select": [
-                [
-                  {
-                    "params": [
-                      "value"
-                    ],
-                    "type": "field"
-                  },
-                  {
-                    "params": [],
-                    "type": "median"
-                  }
-                ]
-              ],
-              "tags": [
-                {
-                  "key": "function",
-                  "operator": "=",
-                  "value": "revisions"
-                }
-              ]
             }
           ],
           "timeFrom": null,
@@ -1404,10 +1278,7 @@
           "y_formats": [
             "s",
             "short"
-          ],
-          "leftYAxisLabel": "Median Response Time",
-          "rightYAxisLabel": "",
-          "decimals": 2
+          ]
         }
       ],
       "title": "New row"
@@ -1841,6 +1712,6 @@
   },
   "refresh": "5m",
   "schemaVersion": 8,
-  "version": 38,
+  "version": 39,
   "links": []
 }
