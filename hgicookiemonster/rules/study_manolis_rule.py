@@ -18,8 +18,8 @@ def _matches(cookie: Cookie, context: HgiContext) -> bool:
 
 def _action(cookie: Cookie, context: HgiContext) -> bool:
     timestamp = cookie.enrichments.get_most_recent_from_source(IRODS_UPDATE_ENRICHMENT).timestamp
-    context.slack.post("Additional library in iRODS for study %s (MANOLIS) at %s: %s"
-                       % (MANOLIS_STUDY_ID, timestamp, cookie.identifier))
+    context.rule_writer("Additional library in iRODS for study %s (MANOLIS) at %s: %s"
+                        % (MANOLIS_STUDY_ID, timestamp, cookie.identifier))
     return False
 
 

@@ -32,10 +32,13 @@ CONFIG_INFLUXDB_PASSWORD = "password"
 CONFIG_INFLUXDB_DATABASE = "database"
 CONFIG_INFLUXDB_BUFFER_LATENCY = "buffer_latency"
 
-CONFIG_SLACK = "slack"
-CONFIG_SLACK_TOKEN = "token"
-CONFIG_SLACK_DEFAULT_CHANNEL = "default_channel"
-CONFIG_SLACK_DEFAULT_USERNAME = "default_username"
+# CONFIG_SLACK = "slack"
+# CONFIG_SLACK_TOKEN = "token"
+# CONFIG_SLACK_DEFAULT_CHANNEL = "default_channel"
+# CONFIG_SLACK_DEFAULT_USERNAME = "default_username"
+
+CONFIG_RULE_OUTPUT = "output"
+CONFIG_RULE_OUTPUT_LOG = "rule_log"
 
 CONFIG_MESSAGE_QUEUE = "message_queue"
 CONFIG_MESSAGE_QUEUE_HOST = "host"
@@ -85,11 +88,15 @@ class CookieMonsterConfig:
             self.database = None    # type: str
             self.buffer_latency = None  # type: int
 
-    class SlackConfig:
+    # class SlackConfig:
+    #     def __init__(self):
+    #         self.token = None   # type: str
+    #         self.default_channel = None     # type: str
+    #         self.default_username = None     # type: str
+
+    class OutputConfig:
         def __init__(self):
-            self.token = None   # type: str
-            self.default_channel = None     # type: str
-            self.default_username = None     # type: str
+            self.log_file = None  # type: str
 
     class MessageQueueConfig:
         def __init__(self):
@@ -106,7 +113,8 @@ class CookieMonsterConfig:
         self.baton = CookieMonsterConfig.BatonConfig()
         self.api = CookieMonsterConfig.ApiConfig()
         self.influxdb = CookieMonsterConfig.InfluxDBConfig()
-        self.slack = CookieMonsterConfig.SlackConfig()
+        # self.slack = CookieMonsterConfig.SlackConfig()
+        self.output = CookieMonsterConfig.OutputConfig()
         self.message_queue = CookieMonsterConfig.MessageQueueConfig()
 
 
@@ -153,9 +161,11 @@ def load_config(location: str) -> CookieMonsterConfig:
     config.influxdb.database = config_parser[CONFIG_INFLUXDB].get(CONFIG_INFLUXDB_DATABASE)
     config.influxdb.buffer_latency = config_parser[CONFIG_INFLUXDB].getint(CONFIG_INFLUXDB_BUFFER_LATENCY)
 
-    config.slack.token = config_parser[CONFIG_SLACK].get(CONFIG_SLACK_TOKEN)
-    config.slack.default_channel = config_parser[CONFIG_SLACK].get(CONFIG_SLACK_DEFAULT_CHANNEL)
-    config.slack.default_username = config_parser[CONFIG_SLACK].get(CONFIG_SLACK_DEFAULT_USERNAME)
+    # config.slack.token = config_parser[CONFIG_SLACK].get(CONFIG_SLACK_TOKEN)
+    # config.slack.default_channel = config_parser[CONFIG_SLACK].get(CONFIG_SLACK_DEFAULT_CHANNEL)
+    # config.slack.default_username = config_parser[CONFIG_SLACK].get(CONFIG_SLACK_DEFAULT_USERNAME)
+
+    config.output.log_file = config_parser[CONFIG_RULE_OUTPUT].get(CONFIG_RULE_OUTPUT_LOG)
 
     config.message_queue.host = config_parser[CONFIG_MESSAGE_QUEUE].get(CONFIG_MESSAGE_QUEUE_HOST)
     config.message_queue.port = config_parser[CONFIG_MESSAGE_QUEUE].getint(CONFIG_MESSAGE_QUEUE_PORT)

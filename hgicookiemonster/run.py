@@ -27,6 +27,7 @@ from cookiemonster.retriever.source.irods.baton_mappers import BatonUpdateMapper
 
 from hgicookiemonster.clients.message_queue import BasicMessageQueue
 from hgicookiemonster.clients.slack import BasicSlackClient
+from hgicookiemonster.clients.rule_log import RuleOutputWriter
 from hgicookiemonster.config import load_config
 from hgicookiemonster.context import HgiContext
 
@@ -63,15 +64,19 @@ def run(config_location):
     retrieval_manager = PeriodicRetrievalManager(config.retrieval.period, update_mapper, logger)
 
     # # Setup basic Slack client
-    slack = BasicSlackClient(config.slack.token, config.slack.default_channel, config.slack.default_username)
-    #
+    # slack = BasicSlackClient(config.slack.token, config.slack.default_channel, config.slack.default_username)
+    slack = None
+
+    # Setup rule output log file writer
+    rule_log_writer = RuleOutputWriter(config.output.log_file)
+
     # # Setup basic message queue (e.g. RabbitMQ) client
     # message_queue = BasicMessageQueue(config.message_queue.host, config.message_queue.port,
     #                                   config.message_queue.username, config.message_queue.password)
     message_queue = None
 
     # Define the context that rules and enrichment loaders has access to
-    context = HgiContext(cookie_jar, config, slack, message_queue)
+    context = HgiContext(cookie_jar, config, rule_log_writer, slack, message_queue)
 
     # Setup rules source
     rules_source = RuleSource(config.processing.rules_location, context)
