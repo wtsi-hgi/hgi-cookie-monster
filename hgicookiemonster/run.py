@@ -92,6 +92,7 @@ def run(config_location):
     # Connect components to the cookie jar
     _connect_retrieval_manager_to_cookie_jar(retrieval_manager, cookie_jar, config.cookie_jar.max_requests_per_second,
                                              logger)
+    _connect_retrieval_manager_to_since_file(retrieval_manager, config_location)
     _connect_processor_manager_to_cookie_jar(processor_manager, cookie_jar)
 
     # Setup the HTTP API
@@ -174,6 +175,28 @@ def _connect_retrieval_manager_to_cookie_jar(retrieval_manager: RetrievalManager
             thread_pool.submit(timed_enrichment, update.target, enrichment)
 
     retrieval_manager.add_listener(put_updates_in_cookie_jar)
+
+
+def _connect_retrieval_manager_to_since_file(retrieval_manager: RetrievalManager,
+                                             config_location: str):
+    """
+    Connect the given retrieval manager to the "since" file
+
+    @param  retrieval_manager  The retrieval manager
+    @param  config_location    Directory containing since file
+    """
+    since_file = os.path.join(config_location, "since")
+
+    def update_since_file(update_collection: UpdateCollection):
+        nonlocal since_file
+        
+        if update_collection:
+            last_retrieval_time = update_collection.get_most_recent()[0].timestamp
+
+            with open(since_file, "w") as f:
+                f.write(str(int(last_retrieval_time.timestamp())))
+
+    retrieval_manager.add_listener(update_since_file)
 
 
 if __name__ == "__main__":
