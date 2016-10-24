@@ -100,9 +100,15 @@ def run(config_location):
     api.inject(APIDependency.System, None)
     api.listen(config.api.port)
 
-    # Start the retrieval manager
-    # FIXME Get since value from file or fallback to invocation time
-    # retrieval_manager.start(config.retrieval.since)
+    # Start the retrieval manager from the last known successful
+    # retrieval time (or invocation time, otherwise)
+    try:
+        with open(os.path.join(config_location, "since"), "r") as f:
+            since_time = datetime.fromtimestamp(int(f.read()))
+    except:
+        since_time = datetime.now()
+
+    retrieval_manager.start(since_time)
 
     # Start processing of any unprocessed cookies
     processor_manager.process_any_cookies()
