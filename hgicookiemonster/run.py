@@ -1,9 +1,8 @@
-import argparse
 import logging
 import time
+import os
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
-from os import environ
 from threading import Lock
 
 from cookiemonster.common.collections import UpdateCollection
@@ -38,7 +37,7 @@ IRODS_UPDATE_ENRICHMENT = "irods_update"
 
 def run(config_location):
     # Load config
-    config = load_config(config_location)
+    config = load_config(os.path.join(config_location, "setup.conf"))
 
     # Setup measurement logging
     logging_buffer_latency = timedelta(seconds=config.influxdb.buffer_latency)
@@ -49,7 +48,7 @@ def run(config_location):
     # Set HTTP connection pool size (for CouchDB)
     # NOTE This is taken from an environment variable, as it's not
     # something that would probably need tweaking that much:
-    pool_size = int(environ.get('COOKIEMONSTER_HTTP_POOL_SIZE', 16))
+    pool_size = int(os.environ.get('COOKIEMONSTER_HTTP_POOL_SIZE', 16))
     patch_http_connection_pool(maxsize=pool_size)
 
     # Setup cookie jar
@@ -178,10 +177,12 @@ if __name__ == "__main__":
     # Stop requests library from logging lots of "Starting new HTTP connection (1): XX.XX.XX.XX"
     logging.getLogger("requests").setLevel(logging.WARNING)
 
-    # Parse arguments
-    parser = argparse.ArgumentParser(description="Eat cookies")
-    parser.add_argument("configurationLocation", type=str, help="Location of the configuration file")
-    args = parser.parse_args()
+    # Check ~/.cookie-monster exists and contains setup.conf
+    configurationLocation = os.path.join(os.path.expanduser("~"), ".cookie-monster")
+    if not os.path.isdir(configurationLocation):
+        raise NotADirectoryError("{} does not exist or is not a directory".format(configurationLocation))
+    if not os.path.exists(os.path.join(configurationLocation, "setup.conf")):
+        raise FileNotFoundError("No setup.conf found in {}".format(configurationLocation))
 
     # Go!
-    run(args.configurationLocation)
+    run(configurationLocation)
