@@ -102,7 +102,8 @@ def run(config_location):
     api.listen(config.api.port)
 
     # Start the retrieval manager
-    retrieval_manager.start(config.retrieval.since)
+    # FIXME Get since value from file or fallback to invocation time
+    # retrieval_manager.start(config.retrieval.since)
 
     # Start processing of any unprocessed cookies
     processor_manager.process_any_cookies()

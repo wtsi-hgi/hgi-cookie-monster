@@ -1,9 +1,8 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 from configparser import ConfigParser
 
 CONFIG_RETRIEVAL = "retrieval"
 CONFIG_RETRIEVAL_PERIOD = "period"
-CONFIG_RETRIEVAL_SINCE = "since"
 
 CONFIG_COOKIEJAR = "cookiejar"
 CONFIG_COOKIEJAR_URL = "url"
@@ -54,7 +53,6 @@ class CookieMonsterConfig:
     class RetrievalConfig:
         def __init__(self):
             self.period = None  # type: float
-            self.since = None   # type: datetime
 
     class CookieJarConfig:
         def __init__(self):
@@ -130,8 +128,6 @@ def load_config(location: str) -> CookieMonsterConfig:
     config = CookieMonsterConfig()
 
     config.retrieval.period = config_parser[CONFIG_RETRIEVAL].getfloat(CONFIG_RETRIEVAL_PERIOD)
-    config.retrieval.since = datetime.fromtimestamp(config_parser[CONFIG_RETRIEVAL].getint(
-        CONFIG_RETRIEVAL_SINCE, fallback=int(datetime.now().timestamp())))
 
     config.processing.max_threads = config_parser[CONFIG_PROCESSING].getint(
         CONFIG_PROCESSING_MAX_THREADS)
