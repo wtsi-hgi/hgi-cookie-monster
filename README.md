@@ -11,9 +11,10 @@ The HGI implementation of Cookie Monster.
    `setup.example.conf`.
 
 3. Ensure your iRODS environment configuration file
-   (`~/.irods/.irodsEnv`) has Kerberos authentication disabled by
-   removing any `irodsAuthScheme 'KRB'` line. Your `~/.irods` directory
-   will ultimately be bind mounted into the Docker container.
+   (`~/.irods/.irodsEnv` or `~/.irods/irods_environment.json`) has
+   Kerberos authentication disabled by removing the appropriate iRODS
+   authentication scheme line. Your `~/.irods` directory will ultimately
+   be bind mounted into the Docker container.
 
 4. Start the Docker container in interactive mode, with the `~/.irods`
    bind mount:
@@ -37,7 +38,7 @@ The HGI implementation of Cookie Monster.
    ```sh
    docker run -d \
               -p 50666:5000 \
-              -v /path/to/your/setup:/cookie-monster-setup \
+              -v /path/to/your/setup:/root/.cookie-monster \
               -v /path/to/your/.irods:/root/.irods \
               -v /path/to/your/rules:/cookie-monster/hgicookiemonster/rules \
               -v /path/to/your/enrichment_loaders:/cookie-monster/hgicookiemonster/enrichment_loaders \
