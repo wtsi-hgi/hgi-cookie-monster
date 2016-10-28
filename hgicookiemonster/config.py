@@ -7,6 +7,7 @@ CONFIG_RETRIEVAL_PERIOD = "period"
 CONFIG_COOKIEJAR = "cookiejar"
 CONFIG_COOKIEJAR_URL = "url"
 CONFIG_COOKIEJAR_DATABASE = "database"
+CONFIG_COOKIEJAR_CACERT = "cacert"
 CONFIG_COOKIEJAR_MAX_REQUESTS_PER_SECOND = "max_requests_per_second"
 CONFIG_COOKIEJAR_BUFFER_CAPACITY = "buffer_capacity"
 CONFIG_COOKIEJAR_BUFFER_LATENCY = "buffer_latency"
@@ -58,6 +59,7 @@ class CookieMonsterConfig:
         def __init__(self):
             self.url = None    # type: str
             self.database = None    # type: str
+            self.cacert = None    # type: str
             self.max_requests_per_second = None     # type: int
             self.buffer_capacity = None  # type: int
             self.buffer_latency = None  # type: timedelta
@@ -138,6 +140,7 @@ def load_config(location: str) -> CookieMonsterConfig:
 
     config.cookie_jar.url = config_parser[CONFIG_COOKIEJAR].get(CONFIG_COOKIEJAR_URL)
     config.cookie_jar.database = config_parser[CONFIG_COOKIEJAR].get(CONFIG_COOKIEJAR_DATABASE)
+    config.cookie_jar.cacert = config_parser[CONFIG_COOKIEJAR].get(CONFIG_COOKIEJAR_CACERT, fallback=None)
     config.cookie_jar.max_requests_per_second = config_parser[CONFIG_COOKIEJAR].getint(
         CONFIG_COOKIEJAR_MAX_REQUESTS_PER_SECOND)
     config.cookie_jar.buffer_capacity = config_parser[CONFIG_COOKIEJAR].getint(
