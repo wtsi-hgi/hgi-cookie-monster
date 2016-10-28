@@ -52,9 +52,12 @@ def run(config_location):
     patch_connection_pools(maxsize=pool_size)
 
     # Setup cookie jar
-    cookie_jar = RateLimitedBiscuitTin(config.cookie_jar.max_requests_per_second, config.cookie_jar.url,
+    cookie_jar = RateLimitedBiscuitTin(config.cookie_jar.max_requests_per_second,
+                                       config.cookie_jar.url,
                                        config.cookie_jar.database,
-                                       config.cookie_jar.buffer_capacity, config.cookie_jar.buffer_latency)
+                                       config.cookie_jar.buffer_capacity,
+                                       config.cookie_jar.buffer_latency,
+                                       verify=config.cookie_jar.cacert)
     add_cookie_jar_logging(cookie_jar, logger)
     add_couchdb_logging(cookie_jar, logger)
 
